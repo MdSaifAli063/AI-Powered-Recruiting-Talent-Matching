@@ -389,54 +389,76 @@ export default function LandingPage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-24 px-6 bg-[#06061c]">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>Contact Us</h2>
-            <p className="text-white/50 text-sm max-w-xl mx-auto">Have questions about our platform? We're here to help you scale your team.</p>
-          </div>
+      <section id="contact" className="py-24 px-6 bg-[#06061c] relative overflow-hidden">
+        {/* Background Orbs */}
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#00E5FF]/5 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="flex flex-col lg:flex-row gap-16">
+            {/* Left side: Contact Info */}
+            <div className="flex-1">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] animate-pulse" />
+                <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Connect</span>
+              </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-12">
-            <div className="space-y-8">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#00E5FF]/10 flex items-center justify-center text-[#00E5FF] shrink-0">
-                  <MessageSquare size={20} />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold mb-1">Support Chat</h4>
-                  <p className="text-sm text-white/50">Our team is available 24/7 for technical assistance.</p>
-                  <p className="text-[#00E5FF] text-sm mt-2 font-bold cursor-pointer hover:underline">Chat with us →</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b] shrink-0">
-                  <Target size={20} />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold mb-1">Sales Inquiry</h4>
-                  <p className="text-sm text-white/50">Learn how HireMind can help your specific hiring needs.</p>
-                  <p className="text-[#f59e0b] text-sm mt-2 font-bold cursor-pointer hover:underline">Book a Demo →</p>
-                </div>
+              <h2 className="text-4xl lg:text-[42px] font-bold text-white mb-6 tracking-tight leading-[1.1]" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>
+                Let's Build the Future of <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#00B8D4]">Talent Acquisition.</span>
+              </h2>
+              <p className="text-white/50 text-lg mb-10 max-w-md">Our team is ready to help you implement AI-powered recruiting that actually works.</p>
+
+              <div className="space-y-6">
+                {[
+                  { icon: MessageSquare, title: 'Expert Support', desc: 'Real humans, backed by AI, available 24/7.', color: '#00E5FF' },
+                  { icon: Target, title: 'Strategic Consulting', desc: 'Custom implementation for enterprise teams.', color: '#f59e0b' }
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group">
+                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center transition-colors" style={{ color: item.color }}>
+                      <item.icon size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-bold mb-1">{item.title}</h4>
+                      <p className="text-sm text-white/40">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <form className="glass p-8 rounded-2xl space-y-4 shadow-[0_0_40px_rgba(0,229,255,0.05)] border border-white/5">
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest font-bold text-white/40 mb-2">Name</label>
-                <input type="text" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#00E5FF] transition-colors outline-none" placeholder="Enter your name" />
-              </div>
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest font-bold text-white/40 mb-2">Email</label>
-                <input type="email" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#00E5FF] transition-colors outline-none" placeholder="you@company.com" />
-              </div>
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest font-bold text-white/40 mb-2">Message</label>
-                <textarea rows="4" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#00E5FF] transition-colors outline-none resize-none" placeholder="How can we help?"></textarea>
-              </div>
-              <button type="button" className="w-full bg-[#f59e0b] text-[#06061c] py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#d97706] transition-colors shadow-lg">
-                Send Message
-              </button>
-            </form>
+            {/* Right side: Contact Form */}
+            <div className="flex-1 lg:max-w-[500px]">
+              <form className="glass p-8 rounded-[2.5rem] relative overflow-hidden border border-white/10 shadow-2xl">
+                <div className="space-y-5 relative z-10">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-2 ml-1">First Name</label>
+                      <input type="text" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00E5FF] focus:bg-white/10 transition-all outline-none" placeholder="John" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-2 ml-1">Last Name</label>
+                      <input type="text" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00E5FF] focus:bg-white/10 transition-all outline-none" placeholder="Doe" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-2 ml-1">Work Email</label>
+                    <input type="email" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00E5FF] focus:bg-white/10 transition-all outline-none" placeholder="john@company.com" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-2 ml-1">Your Message</label>
+                    <textarea rows="4" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:border-[#00E5FF] focus:bg-white/10 transition-all outline-none resize-none" placeholder="How can we help?"></textarea>
+                  </div>
+                  <button type="button" className="w-full bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-[#06061c] py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] hover:shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all transform hover:-translate-y-0.5">
+                    Send Message
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </section>
@@ -467,15 +489,22 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#05051a] border-t border-white/5 py-10 px-6 text-center">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
-            <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF" />
-            <path d="M12 4L20 20H12L12 4Z" fill="#1e1b4b" />
-          </svg>
-          <span className="text-lg font-black text-white tracking-tighter" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
+      <footer className="bg-[#05051a] border-t border-white/5 py-12 px-6 text-center">
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex items-center gap-3">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
+              <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF" />
+              <path d="M12 4L20 20H12L12 4Z" fill="#1e1b4b" />
+            </svg>
+            <span className="text-2xl font-black text-white tracking-tighter" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
+          </div>
+          <div className="flex gap-8">
+            {['Product', 'Company', 'Resources', 'Legal'].map(item => (
+              <a key={item} href="#" className="text-[10px] uppercase tracking-widest text-white/30 hover:text-[#00E5FF] transition-colors">{item}</a>
+            ))}
+          </div>
+          <p className="text-[10px] uppercase tracking-widest text-white/20 mt-4">© 2026 HireMind. AI-Powered Recruiting OS.</p>
         </div>
-        <p className="text-[10px] uppercase tracking-widest text-white/30">© 2026 HireMind. AI-Powered Recruiting OS.</p>
       </footer>
     </div>
   );
