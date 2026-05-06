@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Brain, Target, Zap, Shield, TrendingUp, MessageSquare, Star } from 'lucide-react';
+import { Brain, Target, Zap, Shield, TrendingUp, TrendingDown, MessageSquare, Star, Users } from 'lucide-react';
 
 const features = [
   { icon: Brain, title: 'Smart Resume Analyzer', desc: 'AI extracts skills, scores experience depth, and gives actionable feedback in seconds.', color: '#00E5FF' },
@@ -268,22 +268,123 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section id="stats" className="py-20 px-6 bg-[#06061c] border-y border-white/5">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map(({ value, label }, i) => (
-            <motion.div
-              key={label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="text-center"
-            >
-              <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#00b8d4] mb-2">{value}</p>
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#f59e0b]">{label}</p>
-            </motion.div>
-          ))}
+      {/* Analytics Showcase */}
+      <section id="stats" className="py-20 px-6 bg-[#06061c] border-y border-white/5 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00E5FF]/5 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="flex flex-col lg:flex-row gap-12 items-center">
+            {/* Left side: Stats Cards */}
+            <div className="flex-1 order-2 lg:order-1">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { value: '10x', label: 'Faster Screening', color: '#00E5FF', icon: Zap },
+                  { value: '94%', label: 'Match Accuracy', color: '#00E5FF', icon: Brain },
+                  { value: '3.2x', label: 'Diverse Hires', color: '#f59e0b', icon: Users },
+                  { value: '60%', label: 'Time Saved', color: '#f59e0b', icon: TrendingDown }
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.label}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center" style={{ color: s.color }}>
+                        <s.icon size={18} />
+                      </div>
+                      <p className="text-3xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{s.value}</p>
+                    </div>
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{s.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right side: Visual Graph Showcase */}
+            <div className="flex-1 order-1 lg:order-2">
+              <div className="mb-6">
+                <motion.div 
+                  initial={{ opacity: 0, y: -20 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true }}
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] animate-pulse" />
+                  <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Real-time Analytics</span>
+                </motion.div>
+                <h2 className="text-4xl lg:text-[42px] font-bold text-white mb-4 tracking-tight leading-[1.1]" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>
+                  Hiring Performance <br />
+                  <span className="text-[#00E5FF]">Supercharged.</span>
+                </h2>
+                <p className="text-white/50 text-sm max-w-md">Track every stage of your recruitment funnel with AI-powered insights that optimize for speed and quality.</p>
+              </div>
+
+              {/* Simulated Graph Card */}
+              <div className="bg-[#0a0a25] border border-white/10 rounded-2xl p-6 relative overflow-hidden group shadow-2xl">
+                <div className="flex justify-between items-center mb-8">
+                  <div className="flex gap-4">
+                    <div className="h-2 w-8 bg-white/10 rounded-full" />
+                    <div className="h-2 w-12 bg-white/5 rounded-full" />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#00E5FF]" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]" />
+                  </div>
+                </div>
+
+                {/* SVG Graph */}
+                <div className="h-40 w-full relative">
+                  <svg className="w-full h-full overflow-visible">
+                    <motion.path
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      whileInView={{ pathLength: 1, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 2, ease: "easeInOut" }}
+                      d="M 0 140 C 50 130, 100 110, 150 70 S 250 10, 400 40"
+                      fill="none"
+                      stroke="#00E5FF"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <motion.path
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      whileInView={{ pathLength: 1, opacity: 0.3 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 2.5, ease: "easeInOut", delay: 0.5 }}
+                      d="M 0 150 C 60 140, 120 130, 180 110 S 300 80, 400 90"
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  
+                  {/* Tooltip Dot */}
+                  <motion.div 
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="absolute top-10 left-[60%] w-3 h-3 rounded-full bg-[#00E5FF] shadow-[0_0_15px_#00E5FF]" 
+                  />
+                </div>
+
+                {/* Legend */}
+                <div className="mt-6 pt-6 border-t border-white/5 flex gap-8">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#00E5FF]" />
+                    <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Efficiency</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#f59e0b]" />
+                    <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Growth</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
