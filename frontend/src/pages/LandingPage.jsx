@@ -81,9 +81,9 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <div id="home" className="flex flex-col lg:flex-row min-h-screen pt-[130px]">
+      <div id="home" className="flex flex-col lg:flex-row min-h-screen pt-[90px]">
         {/* Left Side */}
-        <div className="w-full lg:w-[45%] bg-[#06061c] relative flex flex-col justify-center px-12 lg:px-20 z-10 py-20 lg:py-0">
+        <div className="w-full lg:w-[45%] bg-[#06061c] relative flex flex-col px-12 lg:px-20 z-10 pt-12 pb-20">
           <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 w-fit text-[10px] font-bold tracking-wider text-[#00E5FF] uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] animate-pulse" />
             AI-Powered Talent Matching
