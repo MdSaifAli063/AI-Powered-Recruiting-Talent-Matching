@@ -169,47 +169,81 @@ export default function LandingPage() {
       </div>
 
       {/* Dedicated About Section */}
-      <section id="about" className="py-24 px-6 bg-[#06061c] border-y border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ background: 'radial-gradient(circle at 70% 30%, #00E5FF 0%, transparent 50%)' }} />
+      <section id="about" className="py-20 px-6 bg-[#06061c] border-y border-white/5 relative overflow-hidden">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#00E5FF]/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-[#f59e0b]/5 rounded-full blur-[100px] pointer-events-none" />
+        
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="flex flex-col lg:flex-row gap-16 items-center">
+          <div className="flex flex-col lg:flex-row gap-12 items-center">
+            {/* Content Side */}
             <div className="flex-1">
-              <h2 className="text-4xl font-bold text-white mb-6 tracking-tight" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]" />
+                <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Our Mission</span>
+              </motion.div>
+
+              <h2 className="text-4xl lg:text-[42px] font-bold text-white mb-5 tracking-tight leading-[1.1]" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>
                 The Next Generation of <br />
-                <span className="text-[#00E5FF]">Recruiting Intelligence.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#00B8D4]">Recruiting Intelligence.</span>
               </h2>
-              <p className="text-white/60 leading-relaxed mb-8 text-lg">
-                HireMind is more than just a job board. It's a complete Recruiting Operating System built for the age of AI. We've combined deep semantic intelligence with human-centric design to solve the most painful problems in hiring.
+              
+              <p className="text-white/60 leading-relaxed mb-8 text-base lg:text-lg font-light">
+                HireMind is a complete <span className="text-white font-medium">Recruiting Operating System</span>. We've combined deep semantic intelligence with human-centric design to solve hiring.
               </p>
-              <div className="grid sm:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#00E5FF]/10 flex items-center justify-center text-[#00E5FF]">
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-[#00E5FF]/30 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-[#00E5FF]/10 flex items-center justify-center text-[#00E5FF] mb-3 group-hover:scale-110 transition-transform">
                     <Brain size={20} />
                   </div>
-                  <h4 className="text-white font-bold">Intelligent Core</h4>
-                  <p className="text-sm text-white/40">Powered by OpenAI's latest models to understand candidate potential, not just keywords.</p>
+                  <h4 className="text-white font-bold text-base mb-1" style={{ fontFamily: '"Outfit", sans-serif' }}>Intelligent Core</h4>
+                  <p className="text-[12px] text-white/40 leading-relaxed">AI models to understand potential, not keywords.</p>
                 </div>
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
+
+                <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-[#f59e0b]/30 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b] mb-3 group-hover:scale-110 transition-transform">
                     <Shield size={20} />
                   </div>
-                  <h4 className="text-white font-bold">Ethical AI</h4>
-                  <p className="text-sm text-white/40">Built-in bias detection ensures that your hiring process is fair, inclusive, and transparent.</p>
+                  <h4 className="text-white font-bold text-base mb-1" style={{ fontFamily: '"Outfit", sans-serif' }}>Ethical AI</h4>
+                  <p className="text-[12px] text-white/40 leading-relaxed">Fair, inclusive, and transparent hiring.</p>
                 </div>
               </div>
             </div>
-            <div className="flex-1 relative">
-              <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 glass p-4 group">
+
+            {/* Image Side */}
+            <div className="flex-1 relative lg:max-w-[450px]">
+              <div className="relative z-20 aspect-square rounded-[2rem] overflow-hidden border border-white/10 glass p-2 group">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06061c] to-transparent opacity-40 z-10" />
                 <img
                   src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1200"
                   alt="Team collaboration"
-                  className="w-full h-full object-cover rounded-2xl grayscale group-hover:grayscale-0 transition-all duration-700"
+                  className="w-full h-full object-cover rounded-[1.5rem] grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 bg-[#00E5FF] text-[#06061c] p-6 rounded-2xl shadow-xl hidden md:block">
-                <p className="text-2xl font-black leading-none" style={{ fontFamily: 'Outfit' }}>94%</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest mt-1 opacity-70">Match Rate</p>
-              </div>
+              
+              {/* Floating Stat Card */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="absolute -bottom-6 -left-6 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-2xl z-30 hidden md:block"
+              >
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-8 h-8 rounded-full bg-[#00E5FF] flex items-center justify-center text-[#06061c]">
+                    <TrendingUp size={16} />
+                  </div>
+                  <p className="text-3xl font-black text-white" style={{ fontFamily: 'Outfit' }}>94%</p>
+                </div>
+                <p className="text-[9px] font-bold text-[#00E5FF] uppercase tracking-[0.2em]">Match Rate</p>
+              </motion.div>
+              {/* Decorative Background Grid for the image */}
+              <div className="absolute -top-10 -right-10 w-full h-full border border-white/5 rounded-[2rem] z-0 hidden lg:block translate-x-4 translate-y-4" />
             </div>
           </div>
         </div>
