@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Brain, Target, Zap, Shield, TrendingUp, MessageSquare, Star } from 'lucide-react';
@@ -18,13 +19,11 @@ const stats = [
   { value: '60%', label: 'Less Time-to-Hire' },
 ];
 
-const testimonials = [
-  { name: 'Priya S.', role: 'Engineering Manager @ Stripe', text: 'HireMind cut our screening time by 70%. The semantic matching is genuinely impressive.', stars: 5 },
-  { name: 'James L.', role: 'Talent Lead @ Linear', text: 'The bias detector alone is worth it. Our JDs are now inclusive and we see it in applicant diversity.', stars: 5 },
-  { name: 'Anika R.', role: 'Senior Candidate', text: 'The AI interview prep gave me real confidence. Got 3 offers in 2 weeks.', stars: 5 },
-];
+
 
 export default function LandingPage() {
+  const [activeNav, setActiveNav] = useState('home');
+
   return (
     <div className="min-h-screen bg-[#06061c] overflow-x-hidden font-sans">
       {/* Navbar */}
@@ -39,13 +38,42 @@ export default function LandingPage() {
             <span className="text-[8px] text-[#00E5FF] lg:text-gray-500 tracking-widest uppercase mt-0.5">Recruiting OS</span>
           </div>
         </div>
-        <div className="hidden md:flex gap-10 text-[11px] font-bold uppercase tracking-[0.15em] text-white lg:text-[#05051a]">
-          <Link to="/" className="text-[#00E5FF]">Home</Link>
-          <a href="#features" className="hover:text-[#00E5FF] transition-colors">Features</a>
-          <a href="#platform" className="hover:text-[#00E5FF] transition-colors">Platform</a>
-          <Link to="/login" className="hover:text-[#00E5FF] transition-colors">Sign In</Link>
+        <div className="hidden md:flex gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-white lg:text-[#05051a]">
+          <a href="#home" 
+             onClick={() => setActiveNav('home')}
+             className={`${activeNav === 'home' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
+            Home
+            {activeNav === 'home' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
+          </a>
+          <a href="#about" 
+             onClick={() => setActiveNav('about')}
+             className={`${activeNav === 'about' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
+            About
+            {activeNav === 'about' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
+          </a>
+          <a href="#features" 
+             onClick={() => setActiveNav('features')}
+             className={`${activeNav === 'features' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
+            Features
+            {activeNav === 'features' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
+          </a>
+          <a href="#stats" 
+             onClick={() => setActiveNav('stats')}
+             className={`${activeNav === 'stats' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
+            Analytics
+            {activeNav === 'stats' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
+          </a>
+          <a href="#contact" 
+             onClick={() => setActiveNav('contact')}
+             className={`${activeNav === 'contact' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
+            Contact Us
+            {activeNav === 'contact' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
+          </a>
         </div>
-        <div>
+        <div className="flex items-center gap-3">
+          <Link to="/login" className="bg-[#f59e0b] text-[#06061c] px-6 py-3 rounded text-[10px] font-bold tracking-widest uppercase hover:bg-[#d97706] transition-colors shadow-lg">
+            Sign In
+          </Link>
           <Link to="/register?role=recruiter" className="bg-[#00E5FF] lg:bg-[#1c165d] text-[#06061c] lg:text-white px-8 py-3 rounded text-[10px] font-bold tracking-widest uppercase hover:opacity-90 transition-colors shadow-lg">
             Start Hiring
           </Link>
@@ -53,7 +81,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row min-h-screen pt-[90px]">
+      <div id="home" className="flex flex-col lg:flex-row min-h-screen pt-[130px]">
         {/* Left Side */}
         <div className="w-full lg:w-[45%] bg-[#06061c] relative flex flex-col justify-center px-12 lg:px-20 z-10 py-20 lg:py-0">
           <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 w-fit text-[10px] font-bold tracking-wider text-[#00E5FF] uppercase">
@@ -139,6 +167,53 @@ export default function LandingPage() {
         </div>
       </div>
 
+      {/* Dedicated About Section */}
+      <section id="about" className="py-24 px-6 bg-[#06061c] border-y border-white/5 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5" style={{ background: 'radial-gradient(circle at 70% 30%, #00E5FF 0%, transparent 50%)' }} />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
+            <div className="flex-1">
+              <h2 className="text-4xl font-bold text-white mb-6 tracking-tight" style={{fontFamily: '"Outfit", system-ui, sans-serif'}}>
+                The Next Generation of <br/>
+                <span className="text-[#00E5FF]">Recruiting Intelligence.</span>
+              </h2>
+              <p className="text-white/60 leading-relaxed mb-8 text-lg">
+                HireMind is more than just a job board. It's a complete Recruiting Operating System built for the age of AI. We've combined deep semantic intelligence with human-centric design to solve the most painful problems in hiring.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#00E5FF]/10 flex items-center justify-center text-[#00E5FF]">
+                    <Brain size={20} />
+                  </div>
+                  <h4 className="text-white font-bold">Intelligent Core</h4>
+                  <p className="text-sm text-white/40">Powered by OpenAI's latest models to understand candidate potential, not just keywords.</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
+                    <Shield size={20} />
+                  </div>
+                  <h4 className="text-white font-bold">Ethical AI</h4>
+                  <p className="text-sm text-white/40">Built-in bias detection ensures that your hiring process is fair, inclusive, and transparent.</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 relative">
+              <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 glass p-4 group">
+                <img 
+                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1200" 
+                  alt="Team collaboration" 
+                  className="w-full h-full object-cover rounded-2xl grayscale group-hover:grayscale-0 transition-all duration-700"
+                />
+              </div>
+              <div className="absolute -bottom-6 -left-6 bg-[#00E5FF] text-[#06061c] p-6 rounded-2xl shadow-xl hidden md:block">
+                <p className="text-2xl font-black leading-none" style={{fontFamily: 'Outfit'}}>94%</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest mt-1 opacity-70">Match Rate</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section below hero */}
       <section id="features" className="py-24 px-6 bg-[#06061c]">
         <div className="max-w-6xl mx-auto">
@@ -177,34 +252,55 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="py-24 px-6 bg-[#06061c]">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: 'Outfit' }}>
-              Loved by Recruiters & Candidates
-            </h2>
+      {/* Contact Section */}
+      <section id="contact" className="py-24 px-6 bg-[#06061c]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Outfit", system-ui, sans-serif'}}>Contact Us</h2>
+            <p className="text-white/50 text-sm max-w-xl mx-auto">Have questions about our platform? We're here to help you scale your team.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {testimonials.map(({ name, role, text, stars }, i) => (
-              <motion.div
-                key={name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white/5 border border-white/10 rounded-2xl p-8"
-              >
-                <div className="flex gap-1 mb-4">
-                  {Array(stars).fill(0).map((_, j) => <Star key={j} size={14} className="fill-[#f59e0b] text-[#f59e0b]" />)}
+          
+          <div className="grid md:grid-cols-2 gap-12">
+            <div className="space-y-8">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#00E5FF]/10 flex items-center justify-center text-[#00E5FF] shrink-0">
+                  <MessageSquare size={20} />
                 </div>
-                <p className="text-sm text-white/70 leading-relaxed mb-6">"{text}"</p>
                 <div>
-                  <p className="text-sm font-bold text-[#00E5FF]">{name}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-white/40 mt-1">{role}</p>
+                  <h4 className="text-white font-bold mb-1">Support Chat</h4>
+                  <p className="text-sm text-white/50">Our team is available 24/7 for technical assistance.</p>
+                  <p className="text-[#00E5FF] text-sm mt-2 font-bold cursor-pointer hover:underline">Chat with us →</p>
                 </div>
-              </motion.div>
-            ))}
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b] shrink-0">
+                  <Target size={20} />
+                </div>
+                <div>
+                  <h4 className="text-white font-bold mb-1">Sales Inquiry</h4>
+                  <p className="text-sm text-white/50">Learn how HireMind can help your specific hiring needs.</p>
+                  <p className="text-[#f59e0b] text-sm mt-2 font-bold cursor-pointer hover:underline">Book a Demo →</p>
+                </div>
+              </div>
+            </div>
+
+            <form className="glass p-8 rounded-2xl space-y-4 shadow-[0_0_40px_rgba(0,229,255,0.05)] border border-white/5">
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest font-bold text-white/40 mb-2">Name</label>
+                <input type="text" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#00E5FF] transition-colors outline-none" placeholder="Enter your name" />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest font-bold text-white/40 mb-2">Email</label>
+                <input type="email" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#00E5FF] transition-colors outline-none" placeholder="you@company.com" />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest font-bold text-white/40 mb-2">Message</label>
+                <textarea rows="4" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#00E5FF] transition-colors outline-none resize-none" placeholder="How can we help?"></textarea>
+              </div>
+              <button type="button" className="w-full bg-[#f59e0b] text-[#06061c] py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#d97706] transition-colors shadow-lg">
+                Send Message
+              </button>
+            </form>
           </div>
         </div>
       </section>
