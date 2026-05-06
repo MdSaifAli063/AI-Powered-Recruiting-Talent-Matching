@@ -114,6 +114,27 @@ h1, h2, h3, h4, h5, h6, .font-display {
     #06061c;
 }
 
+.mesh-gradient-bg {
+  background-color: #06061c;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,0.1) 0, transparent 50%), 
+    radial-gradient(at 0% 50%, hsla(187,100%,42%,0.15) 0, transparent 50%), 
+    radial-gradient(at 100% 50%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+    radial-gradient(at 0% 100%, hsla(339,49%,30%,0.1) 0, transparent 50%), 
+    radial-gradient(at 50% 100%, hsla(187,100%,42%,0.15) 0, transparent 50%), 
+    radial-gradient(at 100% 100%, hsla(225,39%,30%,0.2) 0, transparent 50%);
+  background-size: 200% 200%;
+  animation: mesh-move 15s ease infinite;
+}
+
+@keyframes mesh-move {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
 /* Interactions */
 .card-hover {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);

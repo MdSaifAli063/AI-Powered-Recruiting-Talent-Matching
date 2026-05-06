@@ -169,7 +169,7 @@ export default function LandingPage() {
       </div>
 
       {/* Dedicated About Section */}
-      <section id="about" className="py-20 px-6 bg-[#06061c] border-y border-white/5 relative overflow-hidden">
+      <section id="about" className="py-20 px-6 relative overflow-hidden mesh-gradient-bg">
         {/* Background Decorative Elements */}
         <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#00E5FF]/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-[#f59e0b]/5 rounded-full blur-[100px] pointer-events-none" />
@@ -250,7 +250,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section below hero */}
-      <section id="features" className="py-24 px-6 bg-[#06061c]">
+      <section id="features" className="py-24 px-6 relative mesh-gradient-bg">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>The Complete Hiring Stack</h2>
@@ -269,7 +269,7 @@ export default function LandingPage() {
       </section>
 
       {/* Analytics Showcase */}
-      <section id="stats" className="py-20 px-6 bg-[#06061c] border-y border-white/5 relative overflow-hidden">
+      <section id="stats" className="py-20 px-6 relative overflow-hidden mesh-gradient-bg">
         {/* Background Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00E5FF]/5 rounded-full blur-[120px] pointer-events-none" />
         
@@ -389,7 +389,7 @@ export default function LandingPage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-24 px-6 bg-[#06061c] relative overflow-hidden">
+      <section id="contact" className="py-24 px-6 relative overflow-hidden mesh-gradient-bg">
         {/* Background Orbs */}
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#00E5FF]/5 rounded-full blur-[100px] pointer-events-none" />
         
@@ -489,21 +489,28 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#05051a] border-t border-white/5 py-12 px-6 text-center">
-        <div className="flex flex-col items-center gap-6">
+      <footer className="bg-white py-6 px-6 text-center relative z-20">
+        <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
               <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF" />
-              <path d="M12 4L20 20H12L12 4Z" fill="#1e1b4b" />
+              <path d="M12 4L20 20H12L12 4Z" fill="#06061c" />
             </svg>
-            <span className="text-2xl font-black text-white tracking-tighter" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
+            <span className="text-2xl font-black text-[#06061c] tracking-tighter" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
           </div>
-          <div className="flex gap-8">
+          
+          <div className="flex gap-10">
             {['Product', 'Company', 'Resources', 'Legal'].map(item => (
-              <a key={item} href="#" className="text-[10px] uppercase tracking-widest text-white/30 hover:text-[#00E5FF] transition-colors">{item}</a>
+              <a key={item} href="#" className="text-[11px] uppercase tracking-[0.2em] font-bold text-[#06061c]/50 hover:text-[#00E5FF] transition-colors">{item}</a>
             ))}
           </div>
-          <p className="text-[10px] uppercase tracking-widest text-white/20 mt-4">© 2026 HireMind. AI-Powered Recruiting OS.</p>
+
+          <div className="w-full max-w-lg h-px bg-[#06061c]/5" />
+
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] uppercase tracking-widest text-[#06061c]/30 font-medium">© 2026 HireMind. AI-Powered Recruiting OS.</p>
+            <p className="text-[10px] text-[#06061c]/20">Designed for the future of talent acquisition.</p>
+          </div>
         </div>
       </footer>
     </div>
