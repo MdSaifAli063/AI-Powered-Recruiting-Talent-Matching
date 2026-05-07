@@ -97,6 +97,19 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
+// PUT /api/auth/avatar
+exports.updateAvatar = async (req, res, next) => {
+  try {
+    const { avatar } = req.body;
+    if (!avatar) return res.status(400).json({ success: false, message: 'No avatar data provided.' });
+    
+    const user = await User.findByIdAndUpdate(req.user.id, { avatar }, { new: true });
+    res.json({ success: true, user: { id: user._id, avatar: user.avatar } });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // PUT /api/auth/change-password
 exports.changePassword = async (req, res, next) => {
   try {

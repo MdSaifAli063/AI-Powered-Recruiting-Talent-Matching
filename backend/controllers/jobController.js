@@ -12,6 +12,7 @@ exports.getJobs = async (req, res, next) => {
     if (level) query.level = level;
     if (location) query.location = { $regex: location, $options: 'i' };
     if (search) query.$text = { $search: search };
+    if (req.query.postedBy) query.postedBy = req.query.postedBy;
 
     const total = await Job.countDocuments(query);
     const jobs = await Job.find(query)
