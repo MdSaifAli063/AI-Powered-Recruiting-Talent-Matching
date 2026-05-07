@@ -1,4 +1,4 @@
-import { Bell, Sun, Moon, Search, User, LogOut, Settings } from 'lucide-react';
+import { Bell, Sun, Moon, Search, User, LogOut, Settings, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -25,6 +25,18 @@ export default function TopBar() {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'New Application', desc: 'Sarah Miller applied for Senior Developer', time: '2m ago', color: '#00E5FF', read: false },
+    { id: 2, title: 'Interview Scheduled', desc: 'AI Interview completed for John Doe', time: '1h ago', color: '#f59e0b', read: false }
+  ]);
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+  };
+
+  const dismissNotification = (id) => {
+    setNotifications(notifications.filter(n => n.id !== id));
+  };
   
   const title = PAGE_TITLES[location.pathname] || 'HireMind';
 
@@ -65,7 +77,9 @@ export default function TopBar() {
               ${theme === 'dark' ? 'bg-white/5 text-white/40 hover:text-white' : 'bg-gray-50 text-gray-400 hover:text-[#05051a]'}`}
             >
               <Bell size={18} />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#00E5FF] rounded-full border-2 border-transparent shadow-[0_0_10px_#00E5FF]" />
+              {notifications.length > 0 && (
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#00E5FF] rounded-full border-2 border-transparent shadow-[0_0_10px_#00E5FF]" />
+              )}
             </button>
             
             <AnimatePresence>
@@ -79,21 +93,39 @@ export default function TopBar() {
                 >
                   <div className="flex justify-between items-center mb-6">
                     <h3 className={`text-sm font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>Notifications</h3>
-                    <span className="text-[10px] font-bold text-[#00E5FF] uppercase">2 New</span>
+                    {notifications.length > 0 && (
+                      <button 
+                        onClick={clearAllNotifications}
+                        className="text-[10px] font-bold text-[#00E5FF] uppercase hover:underline"
+                      >
+                        Clear All
+                      </button>
+                    )}
                   </div>
-                  <div className="space-y-4">
-                    {[
-                      { title: 'New Application', desc: 'Sarah Miller applied for Senior Developer', time: '2m ago', color: '#00E5FF' },
-                      { title: 'Interview Scheduled', desc: 'AI Interview completed for John Doe', time: '1h ago', color: '#f59e0b' }
-                    ].map((n, i) => (
-                      <div key={i} className={`p-4 rounded-2xl transition-colors cursor-pointer ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
-                        <div className="flex justify-between items-start mb-1">
-                          <p className={`text-xs font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{n.title}</p>
-                          <span className="text-[9px] text-gray-400 font-bold">{n.time}</span>
+                  <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+                    {notifications.length > 0 ? (
+                      notifications.map((n) => (
+                        <div key={n.id} className={`p-4 rounded-2xl transition-colors group relative ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
+                          <div className="flex justify-between items-start mb-1">
+                            <p className={`text-xs font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{n.title}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] text-gray-400 font-bold">{n.time}</span>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); dismissNotification(n.id); }}
+                                className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                              >
+                                <X size={10} />
+                              </button>
+                            </div>
+                          </div>
+                          <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>{n.desc}</p>
                         </div>
-                        <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>{n.desc}</p>
+                      ))
+                    ) : (
+                      <div className="py-10 text-center">
+                        <p className={`text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-white/20' : 'text-gray-300'}`}>No new alerts</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </motion.div>
               )}
