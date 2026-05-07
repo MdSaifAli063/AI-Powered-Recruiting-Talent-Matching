@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node \"node_modules/concurrently/dist/bin/concurrently.js\" \"cd backend && node server.js\" \"cd frontend && node node_modules/vite/bin/vite.js\"",
+    "dev": "node dev.js",
     "dev:backend": "cd backend && node server.js",
     "dev:frontend": "cd frontend && node node_modules/vite/bin/vite.js",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
