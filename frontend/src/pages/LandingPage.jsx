@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Brain, Target, Zap, Shield, TrendingUp, TrendingDown, MessageSquare, Star, Users } from 'lucide-react';
@@ -23,6 +23,30 @@ const stats = [
 
 export default function LandingPage() {
   const [activeNav, setActiveNav] = useState('home');
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['home', 'about', 'features', 'stats', 'contact'];
+      const scrollPosition = window.scrollY + 100; // Offset for navbar height
+
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const offsetHeight = element.offsetHeight;
+
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveNav(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-[#06061c] overflow-x-hidden font-sans">
