@@ -1,8 +1,53 @@
-const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+// Using gemini-2.0-flash as it's confirmed available for this key
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+const isDummyKey = !process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('dummy');
+
+if (isDummyKey) {
+  console.warn('⚠️ WARNING: Gemini API Key is missing or using a dummy value. AI features will fail.');
+}
+
+// ──────────────────────────────────────────────
+// Helper to call Gemini and get JSON
+// ──────────────────────────────────────────────
+async function callGeminiJSON(prompt) {
+  if (isDummyKey) {
+    const error = new Error('Gemini API Key is not configured. Please add a valid GEMINI_API_KEY to your backend/.env file.');
+    error.statusCode = 503;
+    throw error;
+  }
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // Extract JSON from markdown if Gemini wraps it in ```json ... ```
+    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/{[\s\S]*}/);
+    const cleanText = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
+    
+    return JSON.parse(cleanText);
+  } catch (e) {
+    console.error('❌ Gemini API Error:', e.message);
+    
+    if (e.message.includes('API_KEY_INVALID')) {
+      const err = new Error('Your Gemini API Key is invalid.');
+      err.statusCode = 401;
+      throw err;
+    }
+    
+    if (e.message.includes('SERVICE_DISABLED') || e.message.includes('not been used in project') || e.message.includes('403')) {
+      const err = new Error('Gemini API is not enabled in your Google Cloud Project. Please enable it in the console.');
+      err.statusCode = 503;
+      throw err;
+    }
+
+    throw e;
+  }
+}
 
 // ──────────────────────────────────────────────
 // Resume Analysis
@@ -50,25 +95,24 @@ Return ONLY valid JSON with this exact structure:
 
 Score each dimension from 0-100. Be honest and detailed.`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.3
-  });
-
-  return JSON.parse(response.choices[0].message.content);
+  return await callGeminiJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
-// Generate Embeddings
+// Generate Embeddings (Fallback to Dummy if unavailable)
 // ──────────────────────────────────────────────
 exports.generateEmbedding = async (text) => {
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text.substring(0, 8000)
-  });
-  return response.data[0].embedding;
+  if (isDummyKey) return new Array(768).fill(0);
+
+  try {
+    // Attempt with standard embedding model
+    const embedModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+    const result = await embedModel.embedContent(text.substring(0, 8000));
+    return result.embedding.values;
+  } catch (e) {
+    console.warn('⚠️ Embedding model not found or unavailable for this key. Using zero-vector fallback.');
+    return new Array(768).fill(0);
+  }
 };
 
 // ──────────────────────────────────────────────
@@ -76,13 +120,17 @@ exports.generateEmbedding = async (text) => {
 // ──────────────────────────────────────────────
 exports.cosineSimilarity = (vecA, vecB) => {
   if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
+  // If we're using zero-vectors (fallback), return a random but consistent small score or 0
+  if (vecA.every(v => v === 0)) return 0.5; 
+
   let dot = 0, magA = 0, magB = 0;
   for (let i = 0; i < vecA.length; i++) {
     dot += vecA[i] * vecB[i];
     magA += vecA[i] ** 2;
     magB += vecB[i] ** 2;
   }
-  return dot / (Math.sqrt(magA) * Math.sqrt(magB));
+  const magnitude = Math.sqrt(magA) * Math.sqrt(magB);
+  return magnitude === 0 ? 0 : dot / magnitude;
 };
 
 // ──────────────────────────────────────────────
@@ -93,9 +141,9 @@ exports.generateMatchExplanation = async (candidateProfile, jobDescription, matc
 
 Candidate Skills & Experience: ${candidateProfile}
 Job Description: ${jobDescription}
-Semantic Match Score: ${matchScore}%
+Calculated Match Score: ${matchScore}%
 
-Return JSON:
+Return ONLY JSON:
 {
   "explanation": "2-3 sentence natural language explanation of why this is a good or poor match",
   "strengths": ["top 3 matching strengths"],
@@ -103,13 +151,7 @@ Return JSON:
   "recommendation": "hire|consider|pass"
 }`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.4
-  });
-  return JSON.parse(response.choices[0].message.content);
+  return await callGeminiJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -122,7 +164,7 @@ Candidate's Current Skills: ${candidateSkills.join(', ')}
 Target Job Title: ${jobTitle}
 Job Description: ${jobDescription}
 
-Return JSON:
+Return ONLY JSON:
 {
   "missingSkills": [{"skill": "", "priority": "critical|important|nice-to-have", "reason": ""}],
   "matchingSkills": ["skills the candidate already has"],
@@ -141,20 +183,25 @@ Return JSON:
 
 Sort learningPath by priority (1 = most urgent). overallReadiness is 0-100.`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.4
-  });
-  return JSON.parse(response.choices[0].message.content);
+  return await callGeminiJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
 // AI Interview - Generate Next Question
 // ──────────────────────────────────────────────
 exports.generateInterviewQuestion = async (messages, jobTitle, candidateContext) => {
-  const systemPrompt = `You are an expert technical interviewer for a ${jobTitle} position. 
+  if (isDummyKey) {
+    const error = new Error('AI interviewer is currently offline (API key not configured).');
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const history = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const systemInstruction = `You are an expert technical interviewer for a ${jobTitle} position. 
 Your goal is to evaluate the candidate's technical knowledge, problem-solving ability, and communication.
 Ask one focused question at a time. Adapt your questions based on their responses.
 Start with a warm welcome, then ask about 6-8 questions progressively (easy → medium → hard).
@@ -163,17 +210,15 @@ When you've asked enough questions, end with "INTERVIEW_COMPLETE" in your respon
 Keep responses concise and professional.
 ${candidateContext ? `Candidate background: ${candidateContext}` : ''}`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...messages.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }))
-    ],
-    temperature: 0.6,
-    max_tokens: 400
+  const chat = model.startChat({
+    history: history.slice(0, -1),
+    generationConfig: { maxOutputTokens: 400 }
   });
 
-  return response.choices[0].message.content;
+  const lastMessage = messages[messages.length - 1].content;
+  const result = await chat.sendMessage(`${systemInstruction}\n\nCandidate's last response: ${lastMessage}`);
+  const response = await result.response;
+  return response.text();
 };
 
 // ──────────────────────────────────────────────
@@ -190,7 +235,7 @@ exports.generateInterviewReport = async (messages, jobTitle) => {
 Transcript:
 ${conversation}
 
-Return JSON:
+Return ONLY JSON:
 {
   "technicalScore": 0,
   "communicationScore": 0,
@@ -204,13 +249,7 @@ Return JSON:
 
 Score from 0-100. Be honest and constructive.`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.3
-  });
-  return JSON.parse(response.choices[0].message.content);
+  return await callGeminiJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -222,7 +261,7 @@ exports.detectBias = async (jobDescription) => {
 Job Description:
 ${jobDescription}
 
-Return JSON:
+Return ONLY JSON:
 {
   "biasScore": 0,
   "issues": [
@@ -241,13 +280,7 @@ Return JSON:
 
 biasScore: 0 = very biased, 100 = completely neutral/inclusive.`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.3
-  });
-  return JSON.parse(response.choices[0].message.content);
+  return await callGeminiJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -268,20 +301,14 @@ Candidate Skills: ${(candidate.skills || []).join(', ')}
 Target Role: ${jobTitle}
 Tone: ${toneDescriptions[tone] || 'professional'}
 
-Return JSON:
+Return ONLY JSON:
 {
   "subject": "email subject line",
   "message": "full outreach message (150-200 words, personalized to candidate's background)",
   "linkedinVersion": "shorter LinkedIn InMail version (under 100 words)"
 }`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.7
-  });
-  return JSON.parse(response.choices[0].message.content);
+  return await callGeminiJSON(prompt);
 };
 
 module.exports = exports;
