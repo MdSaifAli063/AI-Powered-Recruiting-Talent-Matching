@@ -65,7 +65,7 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center ml-1">
                 <label className="block text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">Password</label>
-                <button type="button" className="text-[10px] font-bold text-[#f59e0b] hover:underline uppercase tracking-widest">Forgot?</button>
+                <Link to="/forgot-password" title="Reset your password" className="text-[10px] font-bold text-[#f59e0b] hover:underline uppercase tracking-widest">Forgot?</Link>
               </div>
               <div className="relative">
                 <input 
