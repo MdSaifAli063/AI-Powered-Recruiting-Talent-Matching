@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Mail, MapPin, Briefcase, Link as LinkIcon, Globe, Phone, Plus, X, Check, Edit3, Trash2 } from 'lucide-react';
+import { Camera, Mail, MapPin, Briefcase, Link as LinkIcon, Globe, Phone, Plus, X, Check, Edit3, Trash2, ExternalLink, Award, GitBranch } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { SectionHeader, Tag, LoadingSpinner } from '../components/ui/Cards';
@@ -8,7 +8,7 @@ import api from '../lib/api';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
-  const { user, setUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -64,7 +64,7 @@ export default function ProfilePage() {
       setLoading(true);
       try {
         const { data } = await api.put('/auth/avatar', { avatar: base64String });
-        setUser({ ...user, avatar: data.user.avatar });
+        updateUser({ avatar: data.user.avatar });
         toast.success('Profile picture updated!');
       } catch (err) {
         toast.error('Failed to update image');
@@ -79,7 +79,7 @@ export default function ProfilePage() {
     setLoading(true);
     try {
       const { data } = await api.put('/auth/profile', formData);
-      setUser({ ...user, ...data.user });
+      updateUser(data.user);
       setEditing(false);
       toast.success('Profile updated successfully!');
     } catch (err) {
@@ -103,44 +103,48 @@ export default function ProfilePage() {
       {/* Profile Header Card */}
       <div className={`relative rounded-[3rem] overflow-hidden border transition-all duration-300 ${glassClass}`}>
         <div className="h-48 w-full bg-gradient-to-r from-[#00E5FF] via-[#6366f1] to-[#8b5cf6] opacity-20" />
-        <div className="px-10 pb-10 -mt-16 flex flex-col md:flex-row gap-8 items-end">
+        <div className="px-10 pb-12 -mt-20 flex flex-col md:flex-row gap-10 items-end">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-[2.5rem] border-4 border-[#06061c] overflow-hidden shadow-2xl bg-[#16161e] flex items-center justify-center">
+            <div className="w-40 h-40 rounded-[3rem] border-[6px] border-[#06061c] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] bg-[#16161e] flex items-center justify-center transition-transform hover:scale-[1.02]">
               {user?.avatar ? (
                 <img src={user.avatar} className="w-full h-full object-cover" alt="" />
               ) : (
-                <span className="text-4xl font-black text-[#00E5FF]">{user?.name?.[0]}</span>
+                <span className="text-5xl font-black text-[#00E5FF]">{user?.name?.[0]}</span>
               )}
               {loading && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <LoadingSpinner size={24} />
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                  <LoadingSpinner size={32} />
                 </div>
               )}
             </div>
             <button 
               onClick={handleAvatarClick}
-              className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-[#00E5FF] text-[#06061c] flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+              className="absolute -bottom-2 -right-2 w-12 h-12 rounded-2xl bg-[#00E5FF] text-[#06061c] flex items-center justify-center shadow-[0_10px_20px_rgba(0,229,255,0.4)] hover:scale-110 active:scale-95 transition-all"
             >
-              <Camera size={18} />
+              <Camera size={22} />
             </button>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
           </div>
 
           <div className="flex-1 pb-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className={`text-3xl font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`} style={{ fontFamily: 'Outfit' }}>{user?.name}</h1>
-                <p className="text-[10px] font-black text-[#00E5FF] uppercase tracking-[0.2em] mt-1">{user?.title || 'Add professional title'}</p>
+                <h1 className={`text-4xl font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`} style={{ fontFamily: 'Outfit' }}>{user?.name}</h1>
+                <div className="flex items-center gap-3 mt-2">
+                  <p className="text-[11px] font-black text-[#00E5FF] uppercase tracking-[0.2em]">{user?.title || 'Professional Title Pending'}</p>
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                  <p className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-white/40' : 'text-gray-400'}`}>{user?.location || 'Global Presence'}</p>
+                </div>
               </div>
               <button 
                 onClick={() => editing ? handleSave() : setEditing(true)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all
+                className={`flex items-center gap-3 px-8 py-4 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest transition-all
                   ${editing 
-                    ? 'bg-[#10b981] text-white shadow-[0_10px_20px_rgba(16,185,129,0.3)]' 
-                    : 'bg-[#00E5FF] text-[#06061c] shadow-[0_10px_20px_rgba(0,229,255,0.25)] hover:scale-[1.02]'}`}
+                    ? 'bg-[#10b981] text-white shadow-[0_15px_30px_rgba(16,185,129,0.3)]' 
+                    : 'bg-[#00E5FF] text-[#06061c] shadow-[0_15px_30px_rgba(0,229,255,0.3)] hover:scale-[1.05]'}`}
               >
-                {loading ? <LoadingSpinner size={14} /> : editing ? <Check size={14} /> : <Edit3 size={14} />}
-                {editing ? 'Save Profile' : 'Edit Profile'}
+                {loading ? <LoadingSpinner size={16} /> : editing ? <Check size={16} /> : <Edit3 size={16} />}
+                {editing ? 'Commit Changes' : 'Initialize Edit'}
               </button>
             </div>
           </div>
@@ -380,47 +384,47 @@ export default function ProfilePage() {
         {/* Sidebar Info */}
         <div className="space-y-8">
           <div className={`rounded-[2.5rem] p-8 border transition-all duration-300 ${glassClass}`}>
-            <SectionHeader title="Connect" />
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
-                  <Globe size={16} className="text-[#00E5FF]" />
+            <SectionHeader title="Digital Identity" subtitle="Professional network connections" />
+            <div className="space-y-6">
+              {[
+                { label: 'LinkedIn', value: formData.linkedin, icon: LinkIcon, color: '#0077b5', field: 'linkedin' },
+                { label: 'GitHub', value: formData.github, icon: GitBranch, color: '#333', field: 'github' },
+                { label: 'Portfolio', value: formData.website, icon: ExternalLink, color: '#6366f1', field: 'website' }
+              ].map(social => (
+                <div key={social.label} className="flex items-center gap-5">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg
+                    ${theme === 'dark' ? 'bg-white/5 text-white/40' : 'bg-gray-50 text-gray-400'}`}>
+                    <social.icon size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{social.label}</p>
+                    {editing ? (
+                      <input 
+                        className={inputClass} 
+                        value={social.value} 
+                        onChange={e => setFormData({ ...formData, [social.field]: e.target.value })} 
+                        placeholder={`Your ${social.label} URL`}
+                      />
+                    ) : (
+                      <p className={`text-xs font-bold mt-1 ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{social.value || 'Link Pending'}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">LinkedIn</p>
-                  {editing ? (
-                    <input className={inputClass} value={formData.linkedin} onChange={e => setFormData({ ...formData, linkedin: e.target.value })} />
-                  ) : (
-                    <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{user?.linkedin || 'Not linked'}</p>
-                  )}
-                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`rounded-[2.5rem] p-8 border transition-all duration-300 ${glassClass}`}>
+            <SectionHeader title="Account Status" />
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-[#00E5FF]/10 to-[#6366f1]/10 border border-[#00E5FF]/20">
+              <div className="flex items-center gap-3 mb-4">
+                <Award size={18} className="text-[#00E5FF]" />
+                <span className="text-[10px] font-black text-white uppercase tracking-widest">Verified {user?.role}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
-                  <Globe size={16} className="text-[#00E5FF]" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">GitHub</p>
-                  {editing ? (
-                    <input className={inputClass} value={formData.github} onChange={e => setFormData({ ...formData, github: e.target.value })} />
-                  ) : (
-                    <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{user?.github || 'Not linked'}</p>
-                  )}
-                </div>
+              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]" style={{ width: '85%' }} />
               </div>
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
-                  <Globe size={16} className="text-[#00E5FF]" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Portfolio</p>
-                  {editing ? (
-                    <input className={inputClass} value={formData.website} onChange={e => setFormData({ ...formData, website: e.target.value })} />
-                  ) : (
-                    <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{user?.website || 'Add website'}</p>
-                  )}
-                </div>
-              </div>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-3">Profile Completion: 85%</p>
             </div>
           </div>
         </div>

@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MapPin, Briefcase, Clock, Building, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { LoadingSpinner, Tag, SectionHeader } from '../components/ui/Cards';
 import toast from 'react-hot-toast';
 
 export default function JobDetail() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
@@ -63,9 +66,13 @@ export default function JobDetail() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Link to="/jobs" className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors">
-        <ArrowLeft size={16} /> Back to jobs
-      </Link>
+      <button 
+        onClick={() => navigate(-1)}
+        className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all w-fit px-4 py-2 rounded-xl mb-4
+          ${theme === 'dark' ? 'text-white/40 hover:text-white hover:bg-white/5' : 'text-gray-400 hover:text-[#05051a] hover:bg-gray-100'}`}
+      >
+        <ArrowLeft size={14} /> Back
+      </button>
 
       <div className="glass rounded-3xl p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-10 blur-3xl pointer-events-none">

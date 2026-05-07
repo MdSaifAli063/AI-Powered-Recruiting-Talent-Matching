@@ -24,9 +24,14 @@ export default function RecruiterPipeline() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?._id) return;
+    const userId = user?.id || user?._id;
+    if (!userId) {
+      // If we are definitely not loading auth anymore but have no ID, stop loading
+      setLoading(false);
+      return;
+    }
     
-    api.get(`/jobs?postedBy=${user._id}`)
+    api.get(`/jobs?postedBy=${userId}`)
       .then(res => {
         setJobs(res.data.data);
         if (res.data.data.length > 0) {
@@ -36,8 +41,11 @@ export default function RecruiterPipeline() {
           setLoading(false);
         }
       })
-      .catch(() => setLoading(false));
-  }, [user?._id]);
+      .catch((err) => {
+        console.error('Pipeline jobs fetch failed:', err);
+        setLoading(false);
+      });
+  }, [user?.id, user?._id]);
 
   const fetchApplicants = async (jobId) => {
     setLoading(true);

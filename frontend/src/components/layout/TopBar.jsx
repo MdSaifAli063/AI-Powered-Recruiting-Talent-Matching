@@ -110,9 +110,13 @@ export default function TopBar() {
             className={`flex items-center gap-3 p-1 rounded-2xl transition-all
               ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'}`}
           >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-black shadow-lg"
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-black shadow-lg overflow-hidden flex-shrink-0"
               style={{ background: 'linear-gradient(135deg,#00E5FF,#6366f1)' }}>
-              {user?.name?.[0]}
+              {user?.avatar ? (
+                <img src={user.avatar} className="w-full h-full object-cover" alt="" />
+              ) : (
+                user?.name?.[0]
+              )}
             </div>
             <span className={`text-xs font-black uppercase tracking-tighter hidden lg:block ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{user?.name?.split(' ')[0]}</span>
           </button>
