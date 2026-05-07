@@ -16,6 +16,8 @@ import SkillGapAnalyzer from './pages/SkillGapAnalyzer';
 import BiasDetector from './pages/BiasDetector';
 import CandidatesPage from './pages/CandidatesPage';
 import RecruiterPipeline from './pages/RecruiterPipeline';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import AppLayout from './components/layout/AppLayout';
 
 function ProtectedRoute({ children, allowedRoles }) {
@@ -38,10 +40,13 @@ function RoleRedirect() {
   return <Navigate to={user.role === 'recruiter' ? '/dashboard/recruiter' : '/dashboard/candidate'} />;
 }
 
+import { ThemeProvider } from './context/ThemeContext';
+
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <Toaster
           position="top-right"
           toastOptions={{
@@ -75,11 +80,14 @@ export default function App() {
             <Route path="bias-detector" element={<ProtectedRoute allowedRoles={['recruiter','admin']}><BiasDetector /></ProtectedRoute>} />
             <Route path="candidates" element={<ProtectedRoute allowedRoles={['recruiter','admin']}><CandidatesPage /></ProtectedRoute>} />
             <Route path="pipeline" element={<ProtectedRoute allowedRoles={['recruiter','admin']}><RecruiterPipeline /></ProtectedRoute>} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

@@ -1,133 +1,197 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Briefcase, TrendingUp, Award, Target, ChevronRight, Star } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, Award, ChevronRight, Star, Target, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { StatCard, LoadingSpinner, SectionHeader, ProgressBar } from '../components/ui/Cards';
+import toast from 'react-hot-toast';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
+import { useTheme } from '../context/ThemeContext';
 
-const FUNNEL_COLORS = ['#6366f1','#8b5cf6','#a78bfa','#fbbf24','#4ade80','#f87171'];
+const FUNNEL_COLORS = ['#00E5FF', '#6366f1', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444'];
 
 export default function RecruiterDashboard() {
+  const { theme } = useTheme();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.get('/analytics/recruiter')
-      .then(r => setData(r.data.data))
-      .catch(console.error)
+      .then(r => {
+        setData(r.data.data);
+        // Force a resize event to trigger Recharts re-measurement
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+        }, 300);
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error('Failed to load real-time analytics');
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <LoadingSpinner size={32} />;
+  if (loading) return <LoadingSpinner size={40} />;
   if (!data) return <div className="text-white/50 text-center py-20">Failed to load analytics.</div>;
 
   const { overview, scoreDistribution, topCandidates, jobPerformance, funnelData } = data;
 
-  const funnelChartData = Object.entries(funnelData || {}).map(([name, value]) => ({ name, value }));
+  const funnelChartData = Object.entries(funnelData || {}).map(([name, value]) => ({ name: name.toUpperCase(), value }));
   const scoreData = [
-    { name: 'Excellent (80+)', value: scoreDistribution?.excellent || 0, color: '#4ade80' },
-    { name: 'Good (60-79)', value: scoreDistribution?.good || 0, color: '#818cf8' },
-    { name: 'Fair (40-59)', value: scoreDistribution?.fair || 0, color: '#fbbf24' },
-    { name: 'Poor (<40)', value: scoreDistribution?.poor || 0, color: '#f87171' },
+    { name: 'EXCELLENT', value: scoreDistribution?.excellent || 0, color: '#00E5FF' },
+    { name: 'GOOD', value: scoreDistribution?.good || 0, color: '#6366f1' },
+    { name: 'FAIR', value: scoreDistribution?.fair || 0, color: '#f59e0b' },
+    { name: 'POOR', value: scoreDistribution?.poor || 0, color: '#ef4444' },
   ];
 
+  const glassClass = theme === 'dark' 
+    ? 'bg-white/5 border-white/5 shadow-2xl' 
+    : 'bg-white border-gray-100 shadow-xl shadow-gray-200/40';
+
   return (
-    <div className="space-y-8 max-w-7xl">
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Briefcase} label="Active Jobs" value={overview.totalJobs} color="#6366f1" delay={0} />
-        <StatCard icon={Users} label="Total Applications" value={overview.totalApplications} color="#8b5cf6" delay={0.05} />
-        <StatCard icon={TrendingUp} label="Candidates" value={overview.totalCandidates} color="#a78bfa" delay={0.1} />
-        <StatCard icon={Award} label="Total Hired" value={overview.totalHired} sub="This cycle" color="#4ade80" delay={0.15} />
+    <div className="space-y-10 max-w-[1600px] mx-auto pb-20">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard icon={Briefcase} label="Active Jobs" value={overview.totalJobs} color="#00E5FF" sub="Recruitment OS" delay={0} />
+        <StatCard icon={Users} label="Total Applications" value={overview.totalApplications} color="#6366f1" sub="+12.5% this week" delay={0.05} />
+        <StatCard icon={Target} label="Qualified Talent" value={overview.totalCandidates} color="#f59e0b" sub="AI Filtered" delay={0.1} />
+        <StatCard icon={Award} label="Final Hires" value={overview.totalHired} color="#10b981" sub="Goal: 10/mo" delay={0.15} />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Hiring Funnel */}
-        <div className="glass rounded-2xl p-6 lg:col-span-2">
-          <SectionHeader title="Hiring Funnel" subtitle="Applicants by stage" />
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={funnelChartData} barCategoryGap="30%">
-              <XAxis dataKey="name" tick={{ fill: 'rgba(226,226,240,0.4)', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: 'rgba(226,226,240,0.4)', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: '#16161e', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, color: '#e2e2f0', fontSize: 12 }} />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                {funnelChartData.map((_, i) => <Cell key={i} fill={FUNNEL_COLORS[i % FUNNEL_COLORS.length]} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Hiring Funnel Visualization */}
+        <div className={`rounded-[2.5rem] p-8 border transition-all duration-300 lg:col-span-2 ${glassClass}`}>
+          <SectionHeader title="Hiring Velocity" subtitle="Candidates through the pipeline" />
+          <div className="h-[300px] w-full mt-4 relative">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={funnelChartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }} height={300}>
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)', fontSize: 9, fontWeight: 900, letterSpacing: '0.1em' }} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  dy={10}
+                />
+                <YAxis 
+                  tick={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)', fontSize: 9, fontWeight: 900 }} 
+                  axisLine={false} 
+                  tickLine={false} 
+                />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(0,229,255,0.05)' }}
+                  contentStyle={{ 
+                    background: theme === 'dark' ? '#0a0a25' : '#fff', 
+                    border: 'none', 
+                    borderRadius: '1.5rem', 
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                    padding: '1rem'
+                  }}
+                  itemStyle={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
+                />
+                <Bar dataKey="value" radius={[12, 12, 12, 12]} barSize={40}>
+                  {funnelChartData.map((_, i) => <Cell key={i} fill={FUNNEL_COLORS[i % FUNNEL_COLORS.length]} fillOpacity={0.8} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Score Distribution */}
-        <div className="glass rounded-2xl p-6">
-          <SectionHeader title="Match Score" subtitle="Candidate distribution" />
-          <ResponsiveContainer width="100%" height={160}>
-            <PieChart>
-              <Pie data={scoreData} cx="50%" cy="50%" innerRadius={45} outerRadius={70}
-                dataKey="value" paddingAngle={3}>
-                {scoreData.map((d, i) => <Cell key={i} fill={d.color} />)}
-              </Pie>
-              <Tooltip contentStyle={{ background: '#16161e', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, fontSize: 12 }} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="space-y-2 mt-2">
+        <div className={`rounded-[2.5rem] p-8 border transition-all duration-300 ${glassClass}`}>
+          <SectionHeader title="AI Match Index" subtitle="Talent quality distribution" />
+          <div className="h-[220px] w-full relative">
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart height={220}>
+                <Pie 
+                  data={scoreData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={65} 
+                  outerRadius={85}
+                  dataKey="value" 
+                  paddingAngle={8}
+                  stroke="none"
+                >
+                  {scoreData.map((d, i) => <Cell key={i} fill={d.color} />)}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className={`text-2xl font-black ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{overview.totalApplications}</span>
+              <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">Total Apps</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 mt-8">
             {scoreData.map(d => (
-              <div key={d.name} className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color }} />
-                <span className="text-white/50 flex-1">{d.name}</span>
-                <span className="text-white/70 font-medium">{d.value}</span>
+              <div key={d.name} className={`p-4 rounded-2xl border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full shadow-[0_0_8px]" style={{ background: d.color, boxShadow: `0 0 10px ${d.color}` }} />
+                  <span className={`text-[9px] font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white/40' : 'text-gray-400'}`}>{d.name}</span>
+                </div>
+                <span className={`text-sm font-black ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{d.value}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Top Candidates */}
-        <div className="glass rounded-2xl p-6">
-          <SectionHeader title="Top Candidates"
-            action={<Link to="/dashboard/candidates" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">View all <ChevronRight size={12} /></Link>}
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Top Talent Spotlight */}
+        <div className={`rounded-[2.5rem] p-8 border transition-all duration-300 ${glassClass}`}>
+          <SectionHeader title="Talent Spotlight"
+            subtitle="Top performing AI-matched candidates"
+            action={<Link to="/dashboard/candidates" className="text-[10px] font-black uppercase tracking-widest text-[#00E5FF] hover:underline flex items-center gap-1">Full Pool <ChevronRight size={12} /></Link>}
           />
-          <div className="space-y-3">
-            {(topCandidates || []).slice(0, 5).map((c, i) => (
+          <div className="space-y-4">
+            {(topCandidates || []).slice(0, 4).map((c, i) => (
               <motion.div key={c._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.06 }}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/4 transition-colors">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                className={`flex items-center gap-4 p-5 rounded-[1.5rem] border transition-all hover:scale-[1.02] cursor-pointer
+                  ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:shadow-xl'}`}>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-sm font-black shadow-lg"
+                  style={{ background: 'linear-gradient(135deg,#00E5FF,#6366f1)' }}>
                   {c.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white/90 truncate">{c.name}</p>
-                  <p className="text-xs text-white/40 truncate">{c.title || 'Candidate'}</p>
+                  <p className={`text-sm font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{c.name}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{c.title || 'Senior Strategist'}</p>
                 </div>
-                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg"
-                  style={{ background: c.profileScore >= 80 ? 'rgba(74,222,128,0.1)' : 'rgba(99,102,241,0.1)' }}>
-                  <Star size={10} className={c.profileScore >= 80 ? 'text-green-400' : 'text-indigo-400'} />
-                  <span className="text-xs font-bold" style={{ color: c.profileScore >= 80 ? '#4ade80' : '#818cf8' }}>
-                    {c.profileScore}
-                  </span>
+                <div className="flex flex-col items-end">
+                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20">
+                    <Zap size={10} fill="#00E5FF" />
+                    <span className="text-xs font-black">{c.profileScore}%</span>
+                  </div>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Job Performance */}
-        <div className="glass rounded-2xl p-6">
-          <SectionHeader title="Job Performance" subtitle="Applications & match rate" />
-          <div className="space-y-4">
-            {(jobPerformance || []).slice(0, 5).map((j, i) => (
-              <div key={j.id}>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-sm text-white/80 truncate max-w-[60%]">{j.title}</span>
-                  <span className="text-xs text-white/45">{j.applications} apps · {j.avgMatchScore}% avg</span>
+        {/* Marketplace Performance */}
+        <div className={`rounded-[2.5rem] p-8 border transition-all duration-300 ${glassClass}`}>
+          <SectionHeader title="Market Index" subtitle="Job performance & match optimization" />
+          <div className="space-y-8 mt-4">
+            {(jobPerformance || []).slice(0, 4).map((j, i) => (
+              <div key={j.id} className="group">
+                <div className="flex justify-between items-end mb-3">
+                  <div>
+                    <span className={`text-[11px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{j.title}</span>
+                    <div className="flex gap-4 mt-1">
+                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{j.applications} Applications</span>
+                      <span className="text-[9px] font-bold text-[#6366f1] uppercase tracking-widest">Active</span>
+                    </div>
+                  </div>
+                  <span className={`text-xs font-black ${theme === 'dark' ? 'text-[#00E5FF]' : 'text-[#6366f1]'}`}>{j.avgMatchScore}% MATCH</span>
                 </div>
-                <ProgressBar value={j.avgMatchScore} delay={i * 0.1} />
+                <ProgressBar value={j.avgMatchScore} color={j.avgMatchScore >= 80 ? '#00E5FF' : '#6366f1'} delay={i * 0.1} />
               </div>
             ))}
             {(!jobPerformance?.length) && (
-              <p className="text-sm text-white/35 text-center py-8">No jobs posted yet. <Link to="/dashboard/candidates" className="text-indigo-400">Post a job</Link></p>
+              <div className="text-center py-12 border-2 border-dashed border-gray-100 rounded-[2rem]">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">No active positions</p>
+                <Link to="/dashboard/candidates" className="text-[10px] font-black uppercase tracking-widest text-[#00E5FF] mt-4 inline-block hover:underline">Deploy New Job</Link>
+              </div>
             )}
           </div>
         </div>
