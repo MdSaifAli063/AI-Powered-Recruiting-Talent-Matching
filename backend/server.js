@@ -50,7 +50,8 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Static files (uploaded resumes)
+// Static files (Frontend build & uploads)
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
@@ -72,9 +73,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+// Catch-all for Frontend SPA navigation
+app.get('*', (req, res) => {
+  if (!req.originalUrl.startsWith('/api/')) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } else {
+    res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+  }
 });
 
 // Global error handler
