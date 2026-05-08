@@ -45,6 +45,15 @@ export default function CandidatesPage() {
         tone: outreachTone
       });
       setOutreachData(data.data);
+      
+      // Dispatch real-time notification
+      window.dispatchEvent(new CustomEvent('add-notification', {
+        detail: {
+          title: 'Outreach Drafted',
+          desc: `AI generated a ${outreachTone} outreach for ${selectedCandidate.name}`,
+          color: '#00E5FF'
+        }
+      }));
     } catch (err) {
       toast.error('Failed to generate outreach');
     } finally {
