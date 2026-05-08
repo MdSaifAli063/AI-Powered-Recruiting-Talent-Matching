@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Send, User, Award, ArrowRight } from 'lucide-react';
+import { Bot, Send, User, Award, ArrowRight, Mic, MicOff } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -16,15 +16,85 @@ export default function AIInterview() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     loadInterviews();
+    return () => {
+      window.speechSynthesis.cancel();
+    };
   }, []);
+
+  const speakText = (text) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Stop any ongoing speech
+      const utterance = new SpeechSynthesisUtterance(text);
+      // Optional: configure voice, rate, pitch
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      
+      // Attempt to pick a good voice
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Siri')) || voices[0];
+      if (preferredVoice) utterance.voice = preferredVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      recognition.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            setInput(prev => prev + event.results[i][0].transcript + ' ');
+          }
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleListening = (e) => {
+    e.preventDefault();
+    if (!recognitionRef.current) {
+      toast.error('Voice recognition is not supported in this browser.');
+      return;
+    }
+    
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+        toast.success('Listening... Speak your response.', { icon: '🎙️' });
+      } catch (err) {
+        console.error('Mic start error:', err);
+      }
+    }
+  };
 
   const loadInterviews = async () => {
     try {
@@ -44,6 +114,7 @@ export default function AIInterview() {
       const { data } = await api.post('/interview/start', { jobTitle });
       setSession(data.data);
       setMessages([{ role: 'assistant', content: data.data.message }]);
+      speakText(data.data.message);
       toast.success('Interview started!');
     } catch (err) {
       toast.error('Failed to start interview');
@@ -57,7 +128,16 @@ export default function AIInterview() {
     try {
       const { data } = await api.get(`/interview/${id}`);
       setSession({ interviewId: data.data._id, jobTitle: data.data.jobTitle });
-      setMessages(data.data.messages.filter(m => m.role !== 'system'));
+      
+      const filteredMessages = data.data.messages.filter(m => m.role !== 'system');
+      setMessages(filteredMessages);
+      
+      if (filteredMessages.length > 0) {
+        const lastMsg = filteredMessages[filteredMessages.length - 1];
+        if (lastMsg.role === 'assistant') {
+          speakText(lastMsg.content);
+        }
+      }
     } catch (err) {
       toast.error('Failed to load session');
     } finally {
@@ -77,7 +157,9 @@ export default function AIInterview() {
     try {
       const { data } = await api.post(`/interview/${session.interviewId}/respond`, { message: userMsg });
       
-      setMessages(prev => [...prev, { role: 'assistant', content: data.data.message }]);
+      const aiMessage = data.data.message;
+      setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }]);
+      speakText(aiMessage);
       
       if (data.data.isComplete) {
         toast.success('Interview complete! Generating report...');
@@ -289,22 +371,35 @@ export default function AIInterview() {
             <textarea 
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder="Type your response... (Press Enter to send)"
-              className="w-full pr-16 min-h-[64px] max-h-[160px] resize-none rounded-2xl p-4 text-sm transition-all border outline-none custom-scrollbar bg-black/40 border-white/10 text-white placeholder:text-white/20 focus:border-[#00E5FF]/50"
+              onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(e); } }}
+              placeholder={isListening ? "Listening... (Speak now)" : "Type your response... (Press Enter to send)"}
+              className={`w-full pr-28 min-h-[64px] max-h-[160px] resize-none rounded-2xl p-4 text-sm transition-all border outline-none custom-scrollbar bg-black/40 text-white placeholder:text-white/20
+                ${isListening ? 'border-[#00E5FF] shadow-[0_0_15px_rgba(0,229,255,0.2)]' : 'border-white/10 focus:border-[#00E5FF]/50'}`}
               disabled={sending}
             />
-            <button 
-              type="submit" 
-              disabled={!input.trim() || sending}
-              className={`absolute right-3 bottom-3 w-10 h-10 rounded-xl flex items-center justify-center transition-all
-                ${!input.trim() || sending 
-                  ? 'opacity-50 cursor-not-allowed bg-gray-500 text-white' 
-                  : 'bg-[#00E5FF] text-[#05051a] hover:bg-[#00E5FF]/90 shadow-lg shadow-cyan-500/20 hover:scale-105'
-                }`}
-            >
-              <Send size={16} className={!input.trim() || sending ? '' : 'translate-x-[-1px] translate-y-[1px]'} />
-            </button>
+            <div className="absolute right-3 bottom-3 flex gap-2">
+              <button 
+                type="button" 
+                onClick={toggleListening}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border
+                  ${isListening 
+                    ? 'bg-red-500/20 text-red-500 border-red-500/50 animate-pulse hover:bg-red-500/30' 
+                    : 'bg-white/5 text-white/50 border-white/10 hover:text-[#00E5FF] hover:bg-[#00E5FF]/10'}`}
+              >
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
+              <button 
+                type="submit" 
+                disabled={!input.trim() || sending}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all
+                  ${!input.trim() || sending 
+                    ? 'opacity-50 cursor-not-allowed bg-gray-500 text-white' 
+                    : 'bg-[#00E5FF] text-[#05051a] hover:bg-[#00E5FF]/90 shadow-lg shadow-cyan-500/20 hover:scale-105'
+                  }`}
+              >
+                <Send size={16} className={!input.trim() || sending ? '' : 'translate-x-[-1px] translate-y-[1px]'} />
+              </button>
+            </div>
           </form>
         </div>
       )}
