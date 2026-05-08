@@ -130,7 +130,7 @@ exports.getMyResume = async (req, res, next) => {
   try {
     const resume = await Resume.findOne({ candidate: req.user.id });
     if (!resume) {
-      return res.status(404).json({ success: false, message: 'No resume found.' });
+      return res.status(200).json({ success: true, data: null, message: 'No resume found.' });
     }
     res.json({ success: true, data: resume });
   } catch (error) {
@@ -169,8 +169,8 @@ exports.matchJob = async (req, res, next) => {
     const resume = await Resume.findOne({ candidate: req.user.id, isAnalyzed: true });
     const job = await Job.findById(jobId);
 
-    if (!resume) return res.status(400).json({ success: false, message: 'Please analyze your resume first.' });
-    if (!job) return res.status(404).json({ success: false, message: 'Job not found.' });
+    if (!resume) return res.status(200).json({ success: false, message: 'Please analyze your resume first.' });
+    if (!job) return res.status(200).json({ success: false, message: 'Job not found.' });
 
     let matchScore = 0;
     if (resume.embedding?.length && job.embedding?.length) {
