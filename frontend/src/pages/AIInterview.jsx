@@ -163,6 +163,16 @@ export default function AIInterview() {
       
       if (data.data.isComplete) {
         toast.success('Interview complete! Generating report...');
+        
+        // Dispatch real-time notification
+        window.dispatchEvent(new CustomEvent('add-notification', {
+          detail: {
+            title: 'Interview Completed',
+            desc: `Your AI Interview for ${session.jobTitle} has been completed and scored.`,
+            color: '#f59e0b'
+          }
+        }));
+
         if (data.data.report) {
           setSession(s => ({ ...s, report: data.data.report, isComplete: true }));
         } else {
