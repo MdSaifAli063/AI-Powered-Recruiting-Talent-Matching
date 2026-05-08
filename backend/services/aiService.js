@@ -1,44 +1,68 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const OpenAI = require('openai');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-// Using gemini-2.0-flash as it's confirmed available for this key
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'dummy');
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-const isDummyKey = !process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('dummy');
+let openai = null;
+if (process.env.NVIDIA_NIM_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.NVIDIA_NIM_API_KEY,
+    baseURL: 'https://integrate.api.nvidia.com/v1',
+  });
+}
+
+const isDummyKey = (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('dummy')) && !process.env.NVIDIA_NIM_API_KEY;
 
 if (isDummyKey) {
-  console.warn('⚠️ WARNING: Gemini API Key is missing or using a dummy value. AI features will fail.');
+  console.warn('⚠️ WARNING: No valid API Keys found. AI features will fail.');
+}
+
+function extractJSON(text) {
+  const jsonMatch = text.match(/```(?:json)?\n([\s\S]*?)\n```/) || text.match(/{[\s\S]*}/);
+  const cleanText = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
+  return JSON.parse(cleanText);
 }
 
 // ──────────────────────────────────────────────
-// Helper to call Gemini and get JSON
+// Helper to call AI (NVIDIA primary, Gemini fallback)
 // ──────────────────────────────────────────────
-async function callGeminiJSON(prompt) {
+async function callAIJSON(prompt) {
   if (isDummyKey) {
-    const error = new Error('Gemini API Key is not configured. Please add a valid GEMINI_API_KEY to your backend/.env file.');
+    const error = new Error('No API Key configured. Please add NVIDIA_NIM_API_KEY or GEMINI_API_KEY to your backend/.env file.');
     error.statusCode = 503;
     throw error;
   }
 
+  // 1. Try NVIDIA First
+  if (openai) {
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "meta/llama-3.1-70b-instruct",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+        max_tokens: 2048,
+      });
+      return extractJSON(completion.choices[0].message.content);
+    } catch (e) {
+      console.warn('⚠️ NVIDIA API Error, falling back to Gemini...', e.message);
+    }
+  }
+
+  // 2. Fallback to Gemini
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
-    
-    // Extract JSON from markdown if Gemini wraps it in ```json ... ```
-    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/{[\s\S]*}/);
-    const cleanText = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
-    
-    return JSON.parse(cleanText);
+    return extractJSON(response.text());
   } catch (e) {
     console.error('❌ Gemini API Error:', e.message);
-    
+
     if (e.message.includes('API_KEY_INVALID')) {
       const err = new Error('Your Gemini API Key is invalid.');
       err.statusCode = 401;
       throw err;
     }
-    
+
     if (e.message.includes('SERVICE_DISABLED') || e.message.includes('not been used in project') || e.message.includes('403')) {
       const err = new Error('Gemini API is not enabled in your Google Cloud Project. Please enable it in the console.');
       err.statusCode = 503;
@@ -95,7 +119,7 @@ Return ONLY valid JSON with this exact structure:
 
 Score each dimension from 0-100. Be honest and detailed.`;
 
-  return await callGeminiJSON(prompt);
+  return await callAIJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -103,6 +127,19 @@ Score each dimension from 0-100. Be honest and detailed.`;
 // ──────────────────────────────────────────────
 exports.generateEmbedding = async (text) => {
   if (isDummyKey) return new Array(768).fill(0);
+
+  if (openai) {
+    try {
+      const response = await openai.embeddings.create({
+        input: text.substring(0, 8000),
+        model: "nvidia/nv-embedqa-e5-v5",
+        input_type: "query"
+      });
+      return response.data[0].embedding;
+    } catch (e) {
+      console.warn('⚠️ NVIDIA Embedding failed, falling back to Gemini...', e.message);
+    }
+  }
 
   try {
     // Attempt with standard embedding model
@@ -121,7 +158,7 @@ exports.generateEmbedding = async (text) => {
 exports.cosineSimilarity = (vecA, vecB) => {
   if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
   // If we're using zero-vectors (fallback), return a random but consistent small score or 0
-  if (vecA.every(v => v === 0)) return 0.5; 
+  if (vecA.every(v => v === 0)) return 0.5;
 
   let dot = 0, magA = 0, magB = 0;
   for (let i = 0; i < vecA.length; i++) {
@@ -151,7 +188,7 @@ Return ONLY JSON:
   "recommendation": "hire|consider|pass"
 }`;
 
-  return await callGeminiJSON(prompt);
+  return await callAIJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -183,7 +220,7 @@ Return ONLY JSON:
 
 Sort learningPath by priority (1 = most urgent). overallReadiness is 0-100.`;
 
-  return await callGeminiJSON(prompt);
+  return await callAIJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -191,15 +228,10 @@ Sort learningPath by priority (1 = most urgent). overallReadiness is 0-100.`;
 // ──────────────────────────────────────────────
 exports.generateInterviewQuestion = async (messages, jobTitle, candidateContext) => {
   if (isDummyKey) {
-    const error = new Error('AI interviewer is currently offline (API key not configured).');
+    const error = new Error('AI interviewer is currently offline (API keys not configured).');
     error.statusCode = 503;
     throw error;
   }
-
-  const history = messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }]
-  }));
 
   const systemInstruction = `You are an expert technical interviewer for a ${jobTitle} position. 
 Your goal is to evaluate the candidate's technical knowledge, problem-solving ability, and communication.
@@ -209,6 +241,33 @@ After each answer, briefly acknowledge it before asking the next question.
 When you've asked enough questions, end with "INTERVIEW_COMPLETE" in your response.
 Keep responses concise and professional.
 ${candidateContext ? `Candidate background: ${candidateContext}` : ''}`;
+
+  if (openai) {
+    try {
+      const nimMessages = [
+        { role: 'system', content: systemInstruction },
+        ...messages.map(m => ({
+          role: m.role,
+          content: m.content
+        }))
+      ];
+
+      const completion = await openai.chat.completions.create({
+        model: "meta/llama-3.1-70b-instruct",
+        messages: nimMessages,
+        temperature: 0.5,
+        max_tokens: 400,
+      });
+      return completion.choices[0].message.content;
+    } catch (e) {
+      console.warn('⚠️ NVIDIA Chat failed, falling back to Gemini...', e.message);
+    }
+  }
+
+  const history = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
 
   const chat = model.startChat({
     history: history.slice(0, -1),
@@ -249,7 +308,7 @@ Return ONLY JSON:
 
 Score from 0-100. Be honest and constructive.`;
 
-  return await callGeminiJSON(prompt);
+  return await callAIJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -280,7 +339,7 @@ Return ONLY JSON:
 
 biasScore: 0 = very biased, 100 = completely neutral/inclusive.`;
 
-  return await callGeminiJSON(prompt);
+  return await callAIJSON(prompt);
 };
 
 // ──────────────────────────────────────────────
@@ -308,7 +367,7 @@ Return ONLY JSON:
   "linkedinVersion": "shorter LinkedIn InMail version (under 100 words)"
 }`;
 
-  return await callGeminiJSON(prompt);
+  return await callAIJSON(prompt);
 };
 
 module.exports = exports;
