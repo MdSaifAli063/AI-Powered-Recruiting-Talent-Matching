@@ -1,4 +1,4 @@
-import { Bell, Sun, Moon, Search, User, LogOut, Settings, X } from 'lucide-react';
+import { Bell, Sun, Moon, Search, User, LogOut, Settings, X, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -18,7 +18,7 @@ const PAGE_TITLES = {
   '/dashboard/settings': 'OS Settings',
 };
 
-export default function TopBar() {
+export default function TopBar({ onMenuClick }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
@@ -52,14 +52,22 @@ export default function TopBar() {
   const title = PAGE_TITLES[location.pathname] || 'HireMind';
 
   return (
-    <header className={`h-[90px] flex items-center justify-between px-8 border-b transition-colors duration-300 flex-shrink-0 z-20 relative
+    <header className={`h-[80px] lg:h-[90px] flex items-center justify-between px-4 lg:px-8 border-b transition-colors duration-300 flex-shrink-0 z-20 relative
       ${theme === 'dark' ? 'bg-[#06061c]/80 border-white/5 backdrop-blur-md' : 'bg-white/80 border-gray-100 backdrop-blur-md'}`}>
       
-      <div className="flex flex-col">
-        <h1 className={`text-xl font-black tracking-tight uppercase ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`} style={{ fontFamily: 'Outfit' }}>{title}</h1>
-        <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={onMenuClick}
+          className={`lg:hidden p-2 rounded-xl transition-all ${theme === 'dark' ? 'text-white/40 hover:bg-white/5' : 'text-gray-400 hover:bg-gray-50'}`}
+        >
+          <Menu size={20} />
+        </button>
+        <div className="flex flex-col">
+          <h1 className={`text-sm lg:text-xl font-black tracking-tight uppercase ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`} style={{ fontFamily: 'Outfit' }}>{title}</h1>
+          <p className={`text-[8px] lg:text-[10px] font-bold uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-6">

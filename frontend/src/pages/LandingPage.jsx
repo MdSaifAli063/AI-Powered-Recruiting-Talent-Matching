@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Brain, Target, Zap, Shield, TrendingUp, TrendingDown, MessageSquare, Star, Users } from 'lucide-react';
+import { Brain, Target, Zap, Shield, TrendingUp, TrendingDown, MessageSquare, Star, Users, Menu, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const features = [
   { icon: Brain, title: 'Smart Resume Analyzer', desc: 'AI extracts skills, scores experience depth, and gives actionable feedback in seconds.', color: '#00E5FF' },
@@ -21,7 +22,9 @@ const stats = [
 
 
 export default function LandingPage() {
+  const { theme } = useTheme();
   const [activeNav, setActiveNav] = useState('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,57 +53,63 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#06061c] overflow-x-hidden font-sans">
       {/* Navbar */}
-      <nav className="h-[90px] bg-[#06061c] lg:bg-white flex items-center justify-between px-8 lg:px-16 fixed top-0 w-full z-[100] shadow-sm">
+      <nav className={`h-[80px] lg:h-[90px] ${theme === 'dark' ? 'bg-[#06061c]' : 'bg-[#06061c] lg:bg-white'} flex items-center justify-between px-6 lg:px-16 fixed top-0 w-full z-[100] shadow-sm transition-all`}>
         <div className="flex items-center gap-3">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
             <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF" />
             <path d="M12 4L20 20H12L12 4Z" className="fill-white lg:fill-[#1e1b4b]" />
           </svg>
           <div className="flex flex-col">
-            <span className="text-2xl font-black text-white lg:text-[#05051a] tracking-tighter leading-none" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
-            <span className="text-[8px] text-[#00E5FF] lg:text-gray-500 tracking-widest uppercase mt-0.5">Recruiting OS</span>
+            <span className="text-xl lg:text-2xl font-black text-white lg:text-[#05051a] tracking-tighter leading-none" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
+            <span className="text-[7px] text-[#00E5FF] lg:text-gray-500 tracking-widest uppercase mt-0.5">Recruiting OS</span>
           </div>
         </div>
-        <div className="hidden md:flex gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-white lg:text-[#05051a]">
-          <a href="#home"
-            onClick={() => setActiveNav('home')}
-            className={`${activeNav === 'home' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
-            Home
-            {activeNav === 'home' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
-          </a>
-          <a href="#about"
-            onClick={() => setActiveNav('about')}
-            className={`${activeNav === 'about' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
-            About
-            {activeNav === 'about' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
-          </a>
-          <a href="#features"
-            onClick={() => setActiveNav('features')}
-            className={`${activeNav === 'features' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
-            Features
-            {activeNav === 'features' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
-          </a>
-          <a href="#stats"
-            onClick={() => setActiveNav('stats')}
-            className={`${activeNav === 'stats' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
-            Analytics
-            {activeNav === 'stats' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
-          </a>
-          <a href="#contact"
-            onClick={() => setActiveNav('contact')}
-            className={`${activeNav === 'contact' ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1`}>
-            Contact Us
-            {activeNav === 'contact' && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
-          </a>
+
+        <div className="hidden lg:flex gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-white lg:text-[#05051a]">
+          {['home', 'about', 'features', 'stats', 'contact'].map(id => (
+            <a key={id} href={`#${id}`}
+              onClick={() => setActiveNav(id)}
+              className={`${activeNav === id ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1 capitalize`}>
+              {id}
+              {activeNav === id && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
+            </a>
+          ))}
         </div>
+
         <div className="flex items-center gap-3">
-          <Link to="/login" className="bg-[#f59e0b] text-[#06061c] px-6 py-3 rounded text-[10px] font-bold tracking-widest uppercase hover:bg-[#d97706] transition-colors shadow-lg">
+          <Link to="/login" className="hidden sm:block bg-[#f59e0b] text-[#06061c] px-6 py-2.5 rounded text-[10px] font-bold tracking-widest uppercase hover:bg-[#d97706] transition-colors shadow-lg">
             Sign In
           </Link>
-          <Link to="/register?role=recruiter" className="bg-[#00E5FF] lg:bg-[#1c165d] text-[#06061c] lg:text-white px-8 py-3 rounded text-[10px] font-bold tracking-widest uppercase hover:opacity-90 transition-colors shadow-lg">
-            Start Hiring
+          <Link to="/register?role=recruiter" className="bg-[#00E5FF] lg:bg-[#1c165d] text-[#06061c] lg:text-white px-5 lg:px-8 py-2.5 rounded text-[10px] font-bold tracking-widest uppercase hover:opacity-90 transition-colors shadow-lg">
+            Start <span className="hidden sm:inline">Hiring</span>
           </Link>
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-white lg:text-[#05051a]">
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {/* Mobile Nav Overlay */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="absolute top-[80px] left-0 w-full bg-[#06061c] border-b border-white/10 p-8 flex flex-col gap-6 lg:hidden shadow-2xl"
+            >
+              {['home', 'about', 'features', 'stats', 'contact'].map(id => (
+                <a key={id} href={`#${id}`}
+                  onClick={() => { setActiveNav(id); setMobileMenuOpen(false); }}
+                  className={`text-sm font-bold uppercase tracking-widest ${activeNav === id ? 'text-[#00E5FF]' : 'text-white/60'}`}>
+                  {id}
+                </a>
+              ))}
+              <div className="pt-6 border-t border-white/5 flex flex-col gap-4">
+                 <Link to="/login" className="w-full text-center bg-[#f59e0b] text-[#06061c] py-4 rounded-xl text-xs font-black uppercase tracking-widest">Sign In</Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}

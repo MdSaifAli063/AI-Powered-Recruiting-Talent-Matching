@@ -1,8 +1,9 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
 import {
   LayoutDashboard, Briefcase, FileText, MessageSquare,
-  TrendingUp, Shield, Users, LogOut, Settings, Bell, User
+  TrendingUp, Shield, Users, LogOut, Settings, X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -23,26 +24,24 @@ const candidateLinks = [
   { to: '/dashboard/skill-gap', icon: TrendingUp, label: 'Skill Gap' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, setIsOpen }) {
   const { user, logout } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const links = user?.role === 'recruiter' ? recruiterLinks : candidateLinks;
+
+  // Auto-close sidebar on route change (mobile)
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname, setIsOpen]);
 
   const handleLogout = () => { logout(); navigate('/'); };
 
-  return (
-    <motion.aside
-      initial={{ x: -280 }}
-      animate={{ x: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className={`w-64 flex flex-col border-r transition-colors duration-300 relative z-30
-        ${theme === 'dark' 
-          ? 'bg-[#0a0a25] border-white/5 shadow-[20px_0_40px_rgba(0,0,0,0.4)]' 
-          : 'bg-white border-gray-100 shadow-[20px_0_40px_rgba(0,0,0,0.02)]'}`}
-    >
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
       {/* Branding */}
-      <div className={`px-8 py-8 ${theme === 'dark' ? 'border-b border-white/5' : 'border-b border-gray-50'}`}>
+      <div className={`px-8 py-8 flex items-center justify-between ${theme === 'dark' ? 'border-b border-white/5' : 'border-b border-gray-50'}`}>
         <div className="flex items-center gap-3">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
             <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF"/>
@@ -55,6 +54,9 @@ export default function Sidebar() {
             <span className="text-[7px] text-[#00E5FF] tracking-[0.3em] uppercase mt-1 font-bold">Recruiting OS</span>
           </div>
         </div>
+        <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors">
+          <X size={20} />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -111,7 +113,7 @@ export default function Sidebar() {
                 </span>
             }
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 text-left">
             <p className={`text-[11px] font-black truncate uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{user?.name}</p>
             <p className="text-[9px] text-[#00E5FF] font-bold truncate uppercase tracking-widest">{user?.role}</p>
           </div>
@@ -121,6 +123,44 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
-    </motion.aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className={`hidden lg:flex w-64 flex-col border-r transition-colors duration-300 relative z-30
+        ${theme === 'dark' 
+          ? 'bg-[#0a0a25] border-white/5 shadow-[20px_0_40px_rgba(0,0,0,0.4)]' 
+          : 'bg-white border-gray-100 shadow-[20px_0_40px_rgba(0,0,0,0.02)]'}`}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[40] lg:hidden"
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className={`fixed left-0 top-0 bottom-0 w-72 flex flex-col z-[50] lg:hidden border-r shadow-2xl
+                ${theme === 'dark' ? 'bg-[#0a0a25] border-white/10' : 'bg-white border-gray-100'}`}
+            >
+              {sidebarContent}
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

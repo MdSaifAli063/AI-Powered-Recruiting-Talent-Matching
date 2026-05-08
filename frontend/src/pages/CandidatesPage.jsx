@@ -100,8 +100,8 @@ export default function CandidatesPage() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar pr-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4 lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar lg:pr-2">
           {loading ? <LoadingSpinner size={32} /> : candidates.length === 0 ? (
             <EmptyState title="No candidates found" description="Try adjusting your search filters" />
           ) : (
@@ -112,13 +112,13 @@ export default function CandidatesPage() {
                 animate={{ opacity: 1, x: 0 }} 
                 transition={{ delay: i * 0.05 }}
                 onClick={() => { setSelectedCandidate(c); setOutreachData(null); }}
-                className={`rounded-[2.5rem] p-6 cursor-pointer border transition-all group relative overflow-hidden
+                className={`rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 cursor-pointer border transition-all group relative overflow-hidden
                   ${selectedCandidate?._id === c._id 
                     ? (theme === 'dark' ? 'border-[#00E5FF] bg-[#00E5FF]/5' : 'border-[#00E5FF] bg-[#00E5FF]/5 shadow-xl shadow-[#00E5FF]/10') 
                     : glassClass + ' hover:scale-[1.01]'}`}
               >
-                <div className="flex items-center gap-6 relative z-10">
-                  <div className="w-16 h-16 rounded-3xl overflow-hidden flex-shrink-0 shadow-2xl relative">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 lg:gap-6 relative z-10 text-center sm:text-left">
+                  <div className="w-16 h-16 rounded-2xl lg:rounded-3xl overflow-hidden flex-shrink-0 shadow-2xl relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#00E5FF] to-[#6366f1] opacity-20" />
                     {c.avatar ? (
                       <img src={c.avatar} alt="" className="w-full h-full object-cover relative z-10"/>
@@ -129,8 +129,8 @@ export default function CandidatesPage() {
                     )}
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-2">
+                  <div className="flex-1 min-w-0 w-full">
+                    <div className="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
                       <div>
                         <h3 className={`text-lg font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{c.name}</h3>
                         <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>{c.title || 'Strategist'}</p>
@@ -142,7 +142,7 @@ export default function CandidatesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6 mb-4 text-[10px] font-black uppercase tracking-widest">
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 lg:gap-6 mb-4 text-[10px] font-black uppercase tracking-widest">
                       {c.location && (
                         <span className={`flex items-center gap-2 ${theme === 'dark' ? 'text-white/20' : 'text-gray-400'}`}>
                           <MapPin size={14} className="text-[#00E5FF]" /> {c.location}
@@ -155,7 +155,7 @@ export default function CandidatesPage() {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                       {c.skills?.slice(0, 6).map(s => (
                         <span key={s} className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all
                           ${theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 group-hover:text-white group-hover:border-white/10' : 'bg-gray-50 border-gray-100 text-gray-400 group-hover:text-[#05051a]'}`}>
@@ -172,7 +172,7 @@ export default function CandidatesPage() {
         </div>
 
         {/* Action Panel */}
-        <div className="h-[calc(100vh-140px)] sticky top-6">
+        <div className="lg:h-[calc(100vh-140px)] lg:sticky lg:top-6 h-auto">
           {selectedCandidate ? (
             <motion.div 
               initial={{ opacity: 0, x: 20 }} 
