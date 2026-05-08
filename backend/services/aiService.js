@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const OpenAI = require('openai');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'dummy');
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 let openai = null;
 if (process.env.NVIDIA_NIM_API_KEY) {
@@ -19,9 +19,28 @@ if (isDummyKey) {
 }
 
 function extractJSON(text) {
-  const jsonMatch = text.match(/```(?:json)?\n([\s\S]*?)\n```/) || text.match(/{[\s\S]*}/);
-  const cleanText = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
-  return JSON.parse(cleanText);
+  try {
+    // 1. Clean up potential markdown noise
+    let cleanText = text.trim();
+    
+    // 2. Try to find JSON within code blocks
+    const jsonMatch = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch && jsonMatch[1]) {
+      return JSON.parse(jsonMatch[1].trim());
+    }
+
+    // 3. Find the first '{' and last '}' to extract a single JSON object
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      return JSON.parse(cleanText.substring(firstBrace, lastBrace + 1));
+    }
+
+    return JSON.parse(cleanText);
+  } catch (e) {
+    console.error("❌ JSON Extraction Failed. Raw text sample:", text.substring(0, 500));
+    throw new Error("AI returned an invalid response format. Please try again.");
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -37,15 +56,21 @@ async function callAIJSON(prompt) {
   // 1. Try NVIDIA First
   if (openai) {
     try {
+      console.log('🤖 Calling NVIDIA NIM (Llama 3.1 70B)...');
       const completion = await openai.chat.completions.create({
         model: "meta/llama-3.1-70b-instruct",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.2,
-        max_tokens: 2048,
+        messages: [
+          { role: "system", content: "You are a specialized AI that only outputs valid JSON. Do not include any conversational text, explanations, or markdown outside of the JSON block if possible." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.1,
+        max_tokens: 4096,
       });
-      return extractJSON(completion.choices[0].message.content);
+      const content = completion.choices[0].message.content;
+      return extractJSON(content);
     } catch (e) {
-      console.warn('⚠️ NVIDIA API Error, falling back to Gemini...', e.message);
+      console.warn('⚠️ NVIDIA API Error:', e.message);
+      console.log('🔄 Falling back to Gemini...');
     }
   }
 
@@ -77,10 +102,13 @@ async function callAIJSON(prompt) {
 // Resume Analysis
 // ──────────────────────────────────────────────
 exports.analyzeResume = async (resumeText) => {
+  // Truncate text to stay within model context limits (approx 12k characters is safe)
+  const truncatedText = resumeText.substring(0, 12000);
+
   const prompt = `You are an expert AI resume analyst. Analyze the following resume text and return a detailed JSON analysis.
 
-Resume Text:
-${resumeText}
+Resume Text (Truncated):
+${truncatedText}
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -352,20 +380,25 @@ exports.generateOutreach = async (recruiterName, company, candidate, jobTitle, t
     persuasive: 'compelling, enthusiastic, and persuasive'
   };
 
-  const prompt = `Generate a personalized recruiter outreach message.
+  const selectedTone = toneDescriptions[tone] || toneDescriptions.professional;
 
-Recruiter: ${recruiterName} at ${company}
+  const prompt = `You are an expert recruitment copywriter. Generate a personalized recruiter outreach message based on the following details.
+
+DETAILS:
+Recruiter: ${recruiterName} from ${company}
 Candidate: ${candidate.name}
-Candidate Skills: ${(candidate.skills || []).join(', ')}
+Candidate Background: ${candidate.title || 'Professional'} with skills in ${(candidate.skills || []).join(', ')}
 Target Role: ${jobTitle}
-Tone: ${toneDescriptions[tone] || 'professional'}
+Tone: ${selectedTone}
 
-Return ONLY JSON:
+Return ONLY valid JSON with this exact structure:
 {
-  "subject": "email subject line",
-  "message": "full outreach message (150-200 words, personalized to candidate's background)",
-  "linkedinVersion": "shorter LinkedIn InMail version (under 100 words)"
-}`;
+  "subject": "A compelling email subject line",
+  "message": "A personalized outreach message of 100-150 words. Mention specific skills.",
+  "linkedinVersion": "A punchy LinkedIn version under 300 characters"
+}
+
+Do not include any other text or markdown tags like \`\`\`json. Return ONLY the JSON object.`;
 
   return await callAIJSON(prompt);
 };
