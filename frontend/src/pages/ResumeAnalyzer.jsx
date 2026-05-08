@@ -84,6 +84,16 @@ export default function ResumeAnalyzer() {
       const { data } = await api.post('/resume/analyze');
       toast.success('Analysis complete!');
       setResume(data.data);
+      
+      // Dispatch real-time notification
+      window.dispatchEvent(new CustomEvent('add-notification', {
+        detail: {
+          title: 'Resume Analyzed',
+          desc: `AI successfully analyzed your resume. Overall score: ${data.data.scores?.overall || 0}%`,
+          color: '#00E5FF'
+        }
+      }));
+      
       await fetchMe();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Analysis failed');
