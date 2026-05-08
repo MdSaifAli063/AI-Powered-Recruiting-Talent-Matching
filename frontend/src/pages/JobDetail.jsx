@@ -43,6 +43,16 @@ export default function JobDetail() {
       const { data } = await api.post(`/jobs/${id}/apply`);
       setApplied(true);
       toast.success('Application submitted successfully!');
+      
+      // Dispatch real-time notification
+      window.dispatchEvent(new CustomEvent('add-notification', {
+        detail: {
+          title: 'Application Submitted',
+          desc: `You successfully applied for ${job.title} at ${job.company}`,
+          color: '#00E5FF'
+        }
+      }));
+
       if (data.matchScore) {
         toast(`AI Match Score: ${data.matchScore}%`, { icon: '🤖' });
       }
@@ -56,7 +66,21 @@ export default function JobDetail() {
   const checkMatch = async () => {
     try {
       const { data } = await api.post('/resume/match-job', { jobId: id });
+      
+      if (!data.success) {
+        return toast.error(data.message || 'Please analyze your resume first');
+      }
+
       setMatchData(data.data);
+      
+      // Dispatch real-time notification
+      window.dispatchEvent(new CustomEvent('add-notification', {
+        detail: {
+          title: 'AI Match Complete',
+          desc: `Your resume matched ${data.data.matchScore}% for ${job.title}`,
+          color: '#f59e0b'
+        }
+      }));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Please analyze your resume first');
     }
