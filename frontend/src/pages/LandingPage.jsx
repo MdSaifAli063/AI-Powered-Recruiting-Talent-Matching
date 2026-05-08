@@ -53,23 +53,23 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#06061c] overflow-x-hidden font-sans">
       {/* Navbar */}
-      <nav className={`h-[80px] lg:h-[90px] ${theme === 'dark' ? 'bg-[#06061c]' : 'bg-[#06061c] lg:bg-white'} flex items-center justify-between px-6 lg:px-16 fixed top-0 w-full z-[100] shadow-sm transition-all`}>
+      <nav className="h-[80px] lg:h-[90px] bg-white/80 backdrop-blur-md flex items-center justify-between px-6 lg:px-16 fixed top-0 w-full z-[100] shadow-sm transition-all border-b border-gray-100">
         <div className="flex items-center gap-3">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
             <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF" />
-            <path d="M12 4L20 20H12L12 4Z" className="fill-white lg:fill-[#1e1b4b]" />
+            <path d="M12 4L20 20H12L12 4Z" className="fill-[#1c165d]" />
           </svg>
           <div className="flex flex-col">
-            <span className="text-xl lg:text-2xl font-black text-white lg:text-[#05051a] tracking-tighter leading-none" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
-            <span className="text-[7px] text-[#00E5FF] lg:text-gray-500 tracking-widest uppercase mt-0.5">Recruiting OS</span>
+            <span className="text-xl lg:text-2xl font-black text-[#05051a] tracking-tighter leading-none" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
+            <span className="text-[7px] text-gray-400 tracking-widest uppercase mt-0.5">Recruiting OS</span>
           </div>
         </div>
 
-        <div className="hidden lg:flex gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-white lg:text-[#05051a]">
+        <div className="hidden lg:flex gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-[#05051a]/60">
           {['home', 'about', 'features', 'stats', 'contact'].map(id => (
             <a key={id} href={`#${id}`}
               onClick={() => setActiveNav(id)}
-              className={`${activeNav === id ? 'text-[#00E5FF]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1 capitalize`}>
+              className={`${activeNav === id ? 'text-[#06061c]' : ''} hover:text-[#00E5FF] transition-all duration-300 relative py-1 capitalize`}>
               {id}
               {activeNav === id && <motion.div layoutId="navUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E5FF]" />}
             </a>
@@ -80,10 +80,10 @@ export default function LandingPage() {
           <Link to="/login" className="hidden sm:block bg-[#f59e0b] text-[#06061c] px-6 py-2.5 rounded text-[10px] font-bold tracking-widest uppercase hover:bg-[#d97706] transition-colors shadow-lg">
             Sign In
           </Link>
-          <Link to="/register?role=recruiter" className="bg-[#00E5FF] lg:bg-[#1c165d] text-[#06061c] lg:text-white px-5 lg:px-8 py-2.5 rounded text-[10px] font-bold tracking-widest uppercase hover:opacity-90 transition-colors shadow-lg">
+          <Link to="/register?role=recruiter" className="px-5 lg:px-8 py-2.5 rounded text-[10px] font-bold tracking-widest uppercase hover:opacity-90 transition-colors shadow-lg bg-[#1c165d] text-white">
             Start <span className="hidden sm:inline">Hiring</span>
           </Link>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-white lg:text-[#05051a]">
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-[#05051a] hover:text-[#00E5FF] transition-colors">
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
