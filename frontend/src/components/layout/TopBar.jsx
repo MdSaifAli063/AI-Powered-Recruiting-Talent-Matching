@@ -1,5 +1,5 @@
 import { Bell, Sun, Moon, Search, User, LogOut, Settings, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
@@ -25,10 +25,21 @@ export default function TopBar() {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'New Application', desc: 'Sarah Miller applied for Senior Developer', time: '2m ago', color: '#00E5FF', read: false },
-    { id: 2, title: 'Interview Scheduled', desc: 'AI Interview completed for John Doe', time: '1h ago', color: '#f59e0b', read: false }
-  ]);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const handleNewNotification = (e) => {
+      setNotifications(prev => [{
+        id: Date.now(),
+        time: 'Just now',
+        read: false,
+        ...e.detail
+      }, ...prev]);
+    };
+
+    window.addEventListener('add-notification', handleNewNotification);
+    return () => window.removeEventListener('add-notification', handleNewNotification);
+  }, []);
 
   const clearAllNotifications = () => {
     setNotifications([]);
