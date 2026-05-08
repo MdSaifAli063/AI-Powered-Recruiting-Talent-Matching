@@ -20,10 +20,9 @@ const stats = [
 ];
 
 
-
 export default function LandingPage() {
   const [activeNav, setActiveNav] = useState('home');
-  
+
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['home', 'about', 'features', 'stats', 'contact'];
@@ -197,14 +196,14 @@ export default function LandingPage() {
         {/* Background Decorative Elements */}
         <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#00E5FF]/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-[#f59e0b]/5 rounded-full blur-[100px] pointer-events-none" />
-        
+
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             {/* Content Side */}
             <div className="flex-1">
-              <motion.div 
-                initial={{ opacity: 0, x: -30 }} 
-                whileInView={{ opacity: 1, x: 0 }} 
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4"
               >
@@ -216,7 +215,7 @@ export default function LandingPage() {
                 The Next Generation of <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#00B8D4]">Recruiting Intelligence.</span>
               </h2>
-              
+
               <p className="text-white/60 leading-relaxed mb-8 text-base lg:text-lg font-light">
                 HireMind is a complete <span className="text-white font-medium">Recruiting Operating System</span>. We've combined deep semantic intelligence with human-centric design to solve hiring.
               </p>
@@ -250,9 +249,9 @@ export default function LandingPage() {
                   className="w-full h-full object-cover rounded-[1.5rem] grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                 />
               </div>
-              
+
               {/* Floating Stat Card */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -296,7 +295,7 @@ export default function LandingPage() {
       <section id="stats" className="py-20 px-6 relative overflow-hidden mesh-gradient-bg">
         {/* Background Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00E5FF]/5 rounded-full blur-[120px] pointer-events-none" />
-        
+
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             {/* Left side: Stats Cards */}
@@ -331,9 +330,9 @@ export default function LandingPage() {
             {/* Right side: Visual Graph Showcase */}
             <div className="flex-1 order-1 lg:order-2">
               <div className="mb-6">
-                <motion.div 
-                  initial={{ opacity: 0, y: -20 }} 
-                  whileInView={{ opacity: 1, y: 0 }} 
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4"
                 >
@@ -386,12 +385,12 @@ export default function LandingPage() {
                       strokeLinecap="round"
                     />
                   </svg>
-                  
+
                   {/* Tooltip Dot */}
-                  <motion.div 
+                  <motion.div
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 3, repeat: Infinity }}
-                    className="absolute top-10 left-[60%] w-3 h-3 rounded-full bg-[#00E5FF] shadow-[0_0_15px_#00E5FF]" 
+                    className="absolute top-10 left-[60%] w-3 h-3 rounded-full bg-[#00E5FF] shadow-[0_0_15px_#00E5FF]"
                   />
                 </div>
 
@@ -416,14 +415,14 @@ export default function LandingPage() {
       <section id="contact" className="py-24 px-6 relative overflow-hidden mesh-gradient-bg">
         {/* Background Orbs */}
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#00E5FF]/5 rounded-full blur-[100px] pointer-events-none" />
-        
+
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row gap-16">
             {/* Left side: Contact Info */}
             <div className="flex-1">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }} 
-                whileInView={{ opacity: 1, x: 0 }} 
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6"
               >
@@ -522,7 +521,7 @@ export default function LandingPage() {
             </svg>
             <span className="text-2xl font-black text-[#06061c] tracking-tighter" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
           </div>
-          
+
           <div className="flex gap-10">
             {['Product', 'Company', 'Resources', 'Legal'].map(item => (
               <a key={item} href="#" className="text-[11px] uppercase tracking-[0.2em] font-bold text-[#06061c]/50 hover:text-[#00E5FF] transition-colors">{item}</a>
