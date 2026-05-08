@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, User, Award, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { LoadingSpinner, ScoreCircle, SectionHeader } from '../components/ui/Cards';
 import toast from 'react-hot-toast';
 
 export default function AIInterview() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [interviews, setInterviews] = useState([]);
   const [session, setSession] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -99,129 +101,209 @@ export default function AIInterview() {
 
   if (!session) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <SectionHeader 
-          title="AI Mock Interviews" 
-          subtitle="Practice adaptive technical and behavioral interviews"
-          action={<button onClick={startInterview} className="btn-primary"><Bot size={16}/> Start New Session</button>}
-        />
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-5xl mx-auto space-y-8"
+      >
+        <div className="glass rounded-3xl p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight mb-2 text-white">AI Mock Interviews</h1>
+            <p className="text-sm text-white/60">Practice adaptive technical and behavioral interviews</p>
+          </div>
+          <button 
+            onClick={startInterview} 
+            className="flex items-center gap-2 justify-center py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-[#00E5FF] text-[#05051a] hover:bg-[#00E5FF]/90 shadow-lg shadow-cyan-500/20"
+          >
+            <Bot size={16}/> Start New Session
+          </button>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          {interviews.map(inv => (
-            <div key={inv._id} className="glass rounded-2xl p-5 flex flex-col justify-between">
-              <div className="mb-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-base font-semibold text-white">{inv.jobTitle}</h3>
-                  <span className={`badge ${inv.status === 'completed' ? 'badge-green' : 'badge-amber'}`}>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {interviews.map((inv, i) => (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+              key={inv._id} 
+              className="glass rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300"
+            >
+              <div className="mb-6">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg mb-2 bg-white/[0.05] border border-white/5 text-white/50">
+                    <Bot size={20} />
+                  </div>
+                  <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest ${inv.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
                     {inv.status}
                   </span>
                 </div>
-                <p className="text-xs text-white/40">{new Date(inv.createdAt).toLocaleDateString()}</p>
+                <h3 className="text-lg font-black tracking-tight leading-tight mb-1 text-white">{inv.jobTitle}</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">{new Date(inv.createdAt).toLocaleDateString()}</p>
               </div>
               
               {inv.status === 'completed' && inv.report ? (
-                <div className="flex items-center justify-between border-t border-white/10 pt-3">
-                  <div className="flex items-center gap-2">
-                    <ScoreCircle score={inv.report.overallScore} size={36} />
-                    <span className="text-xs text-white/60">Overall Score</span>
+                <div className="flex items-center justify-between border-t pt-4 border-white/10">
+                  <div className="flex items-center gap-3">
+                    <ScoreCircle score={inv.report.overallScore} size={40} />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Score</span>
                   </div>
-                  <button onClick={() => resumeInterview(inv._id)} className="btn-secondary text-xs px-3 py-1.5">View Report</button>
+                  <button 
+                    onClick={() => resumeInterview(inv._id)} 
+                    className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-colors bg-white/5 hover:bg-white/10 text-white/80"
+                  >
+                    View Report
+                  </button>
                 </div>
               ) : (
-                <button onClick={() => resumeInterview(inv._id)} className="btn-secondary text-xs px-3 py-1.5 mt-2 self-start">
+                <button 
+                  onClick={() => resumeInterview(inv._id)} 
+                  className="w-full text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all border bg-transparent border-white/10 text-white/60 hover:bg-white/5 hover:text-white"
+                >
                   Continue Interview
                 </button>
               )}
-            </div>
+            </motion.div>
           ))}
           
           {interviews.length === 0 && (
-            <div className="md:col-span-2 text-center py-12 glass-light rounded-2xl border border-white/5 border-dashed">
-              <p className="text-sm text-white/40 mb-3">No previous interviews found.</p>
-              <button onClick={startInterview} className="btn-primary text-sm px-6 py-2">Start your first interview</button>
+            <div className="md:col-span-2 lg:col-span-3 text-center py-20 rounded-3xl border-2 border-dashed glass border-white/10">
+              <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 bg-white/5 text-white/30">
+                <Bot size={32} />
+              </div>
+              <h3 className="text-xl font-black tracking-tight mb-2 text-white">No Interviews Yet</h3>
+              <p className="text-sm mb-6 text-white/50">Start a new mock interview to practice your skills.</p>
+              <button 
+                onClick={startInterview} 
+                className="flex items-center gap-2 justify-center py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all mx-auto bg-[#00E5FF] text-[#05051a] hover:bg-[#00E5FF]/90 shadow-lg shadow-cyan-500/20"
+              >
+                <Bot size={16}/> Start First Session
+              </button>
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col h-[calc(100vh-120px)]">
-      <div className="flex items-center justify-between glass rounded-t-2xl p-4 border-b border-white/10 shrink-0">
-        <div>
-          <h2 className="font-semibold text-white">Interview: {session.jobTitle}</h2>
-          <p className="text-xs text-white/50">{session.isComplete ? 'Completed' : 'In Progress'}</p>
+      <div className="flex items-center justify-between glass rounded-t-3xl p-6 border-b shrink-0 border-white/10">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-white/[0.05] border border-white/5 text-[#00E5FF]">
+            <Bot size={24} />
+          </div>
+          <div>
+            <h2 className="font-black text-lg tracking-tight leading-tight mb-1 text-white">{session.jobTitle}</h2>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${session.isComplete ? 'bg-emerald-500' : 'bg-[#00E5FF] animate-pulse'}`} />
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/50">
+                {session.isComplete ? 'Completed Evaluation' : 'Active Session'}
+              </p>
+            </div>
+          </div>
         </div>
-        <button onClick={() => setSession(null)} className="btn-ghost text-xs">Back to History</button>
+        <button 
+          onClick={() => setSession(null)} 
+          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
+        >
+          Exit
+        </button>
       </div>
 
-      <div className="flex-1 glass overflow-y-auto p-6 space-y-6 custom-scrollbar">
+      <div className="flex-1 glass overflow-y-auto p-6 md:p-8 space-y-8 custom-scrollbar">
         {session.isComplete && session.report && (
-          <div className="mb-8 p-6 rounded-2xl glass-light border border-indigo-500/20 glow-sm">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Award className="text-indigo-400" /> Final Evaluation
-            </h3>
-            <div className="flex gap-6 mb-6">
-              <ScoreCircle score={session.report.overallScore} size={80} label="Overall" />
-              <ScoreCircle score={session.report.technicalScore} size={80} label="Technical" />
-              <ScoreCircle score={session.report.communicationScore} size={80} label="Communication" />
-            </div>
-            <p className="text-sm text-white/80 mb-4">{session.report.summary}</p>
-            <p className="text-sm text-white/60">{session.report.detailedFeedback}</p>
-          </div>
-        )}
-
-        {messages.map((msg, i) => (
           <motion.div 
-            key={i}
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
+            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="p-8 rounded-3xl border glow-sm mb-8 bg-white/[0.02] border-indigo-500/30"
           >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-              msg.role === 'user' ? 'bg-indigo-500' : 'bg-indigo-500/20 border border-indigo-500/40'
-            }`}>
-              {msg.role === 'user' ? <User size={14} className="text-white"/> : <Bot size={16} className="text-indigo-400"/>}
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 rounded-xl bg-indigo-500/20 text-indigo-400">
+                <Award size={24} />
+              </div>
+              <h3 className="text-xl font-black tracking-tight text-white">
+                Final Evaluation
+              </h3>
             </div>
-            <div className={`p-4 text-sm leading-relaxed whitespace-pre-wrap ${
-              msg.role === 'user' ? 'chat-bubble-user text-white' : 'chat-bubble-ai text-white/90'
-            }`}>
-              {msg.content}
+            
+            <div className="flex flex-wrap gap-8 justify-center md:justify-start mb-8">
+              <ScoreCircle score={session.report.overallScore} size={90} label="Overall Match" />
+              <div className="w-[1px] h-20 bg-white/10 hidden md:block" />
+              <ScoreCircle score={session.report.technicalScore} size={90} label="Technical" />
+              <ScoreCircle score={session.report.communicationScore} size={90} label="Communication" />
+            </div>
+            
+            <div className="p-6 rounded-2xl mb-6 bg-black/40 border border-white/5">
+              <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-white/40">Executive Summary</h4>
+              <p className="text-sm leading-relaxed text-white/80">{session.report.summary}</p>
+            </div>
+            
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-white/40">Detailed Feedback</h4>
+              <p className="text-sm leading-relaxed text-white/60">{session.report.detailedFeedback}</p>
             </div>
           </motion.div>
-        ))}
-        {sending && (
-          <div className="flex gap-4 max-w-[85%]">
-            <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center shrink-0">
-              <Bot size={16} className="text-indigo-400"/>
-            </div>
-            <div className="chat-bubble-ai p-4 flex gap-1">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }}/>
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '150ms' }}/>
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }}/>
-            </div>
-          </div>
         )}
-        <div ref={messagesEndRef} />
+
+        <div className="space-y-6">
+          {messages.map((msg, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm
+                ${msg.role === 'user' 
+                  ? 'bg-indigo-500 text-white' 
+                  : 'bg-white/[0.05] border border-white/5 text-[#00E5FF]'
+                }`}
+              >
+                {msg.role === 'user' ? <User size={18} /> : <Bot size={20} />}
+              </div>
+              <div className={`p-5 text-sm leading-relaxed whitespace-pre-wrap shadow-sm
+                ${msg.role === 'user' 
+                  ? 'bg-indigo-500 text-white rounded-2xl rounded-tr-sm' 
+                  : 'bg-white/[0.03] border border-white/5 text-white/90 rounded-2xl rounded-tl-sm'
+                }`}
+              >
+                {msg.content}
+              </div>
+            </motion.div>
+          ))}
+          {sending && (
+            <div className="flex gap-4 max-w-[85%]">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-white/[0.05] border border-white/5 text-[#00E5FF]">
+                <Bot size={20} />
+              </div>
+              <div className="p-5 flex items-center gap-2 rounded-2xl rounded-tl-sm bg-white/[0.03] border border-white/5">
+                <span className="w-2 h-2 rounded-full animate-bounce bg-[#00E5FF]" style={{ animationDelay: '0ms' }}/>
+                <span className="w-2 h-2 rounded-full animate-bounce bg-[#00E5FF]" style={{ animationDelay: '150ms' }}/>
+                <span className="w-2 h-2 rounded-full animate-bounce bg-[#00E5FF]" style={{ animationDelay: '300ms' }}/>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {!session.isComplete && (
-        <div className="glass rounded-b-2xl p-4 shrink-0">
-          <form onSubmit={sendMessage} className="relative">
+        <div className="glass rounded-b-3xl p-6 shrink-0 border-t border-white/10">
+          <form onSubmit={sendMessage} className="relative max-w-4xl mx-auto">
             <textarea 
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder="Type your answer... (Press Enter to send)"
-              className="input-base w-full pr-12 min-h-[60px] resize-none"
+              placeholder="Type your response... (Press Enter to send)"
+              className="w-full pr-16 min-h-[64px] max-h-[160px] resize-none rounded-2xl p-4 text-sm transition-all border outline-none custom-scrollbar bg-black/40 border-white/10 text-white placeholder:text-white/20 focus:border-[#00E5FF]/50"
               disabled={sending}
             />
             <button 
               type="submit" 
               disabled={!input.trim() || sending}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-600 transition-colors"
+              className={`absolute right-3 bottom-3 w-10 h-10 rounded-xl flex items-center justify-center transition-all
+                ${!input.trim() || sending 
+                  ? 'opacity-50 cursor-not-allowed bg-gray-500 text-white' 
+                  : 'bg-[#00E5FF] text-[#05051a] hover:bg-[#00E5FF]/90 shadow-lg shadow-cyan-500/20 hover:scale-105'
+                }`}
             >
-              <Send size={14} />
+              <Send size={16} className={!input.trim() || sending ? '' : 'translate-x-[-1px] translate-y-[1px]'} />
             </button>
           </form>
         </div>
