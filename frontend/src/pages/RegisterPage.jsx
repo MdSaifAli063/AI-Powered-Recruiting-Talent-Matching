@@ -34,18 +34,18 @@ export default function RegisterPage() {
       {/* Left Side: Form */}
       <div className="flex-[1.2] bg-white flex flex-col items-center justify-center px-12 lg:px-24 relative overflow-y-auto py-20">
         <Link to="/" className="absolute top-10 left-12 flex items-center gap-2 text-gray-400 hover:text-[#06061c] transition-all text-[10px] font-bold uppercase tracking-[0.2em]">
-          <ArrowLeft size={14} /> Back to Home
+          <ArrowLeft size={14} /> Back
         </Link>
 
         <div className="w-full max-w-[400px]">
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-8">
               <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
-                <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF"/>
-                <path d="M12 4L20 20H12L12 4Z" fill="#1e1b4b"/>
+                <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF" />
+                <path d="M12 4L20 20H12L12 4Z" fill="#1e1b4b" />
               </svg>
               <div className="flex flex-col">
-                <span className="text-3xl font-black text-[#05051a] tracking-tighter leading-none" style={{fontFamily: 'Outfit'}}>HIREMIND</span>
+                <span className="text-3xl font-black text-[#05051a] tracking-tighter leading-none" style={{ fontFamily: 'Outfit' }}>HIREMIND</span>
                 <span className="text-[10px] text-gray-400 tracking-[0.3em] uppercase mt-1 font-bold">Recruiting OS</span>
               </div>
             </div>
@@ -56,13 +56,13 @@ export default function RegisterPage() {
           {/* Role Selection Toggle */}
           <div className="flex p-1 bg-gray-50 border border-gray-100 rounded-2xl mb-8">
             {['candidate', 'recruiter'].map(r => (
-              <button 
-                key={r} 
+              <button
+                key={r}
                 type="button"
                 onClick={() => setForm(p => ({ ...p, role: r }))}
                 className={`flex-1 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all
-                  ${form.role === r 
-                    ? 'bg-[#6366f1] text-white shadow-lg shadow-indigo-200' 
+                  ${form.role === r
+                    ? 'bg-[#6366f1] text-white shadow-lg shadow-indigo-200'
                     : 'text-gray-400 hover:text-gray-600'}`}
               >
                 {r === 'candidate' ? 'Job Seeker' : 'Recruiter'}
@@ -73,39 +73,39 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-[10px] uppercase tracking-[0.2em] font-black text-gray-400 ml-1">Full Name</label>
-              <input 
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 text-[#05051a] text-sm focus:border-[#00E5FF] transition-all outline-none" 
-                placeholder="Alex Rivera" 
+              <input
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 text-[#05051a] text-sm focus:border-[#00E5FF] transition-all outline-none"
+                placeholder="Alex Rivera"
                 required
-                value={form.name} 
-                onChange={e => setForm(p => ({ ...p, name: e.target.value }))} 
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
               />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[10px] uppercase tracking-[0.2em] font-black text-gray-400 ml-1">Email Address</label>
-              <input 
-                type="email" 
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 text-[#05051a] text-sm focus:border-[#00E5FF] transition-all outline-none" 
-                placeholder="you@company.com" 
+              <input
+                type="email"
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 text-[#05051a] text-sm focus:border-[#00E5FF] transition-all outline-none"
+                placeholder="you@company.com"
                 required
-                value={form.email} 
-                onChange={e => setForm(p => ({ ...p, email: e.target.value }))} 
+                value={form.email}
+                onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
               />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[10px] uppercase tracking-[0.2em] font-black text-gray-400 ml-1">Password</label>
               <div className="relative">
-                <input 
-                  type={showPw ? 'text' : 'password'} 
+                <input
+                  type={showPw ? 'text' : 'password'}
                   className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 text-[#05051a] text-sm focus:border-[#00E5FF] transition-all outline-none pr-12"
-                  placeholder="Min 6 characters" 
-                  minLength={6} 
+                  placeholder="Min 6 characters"
+                  minLength={6}
                   required
-                  value={form.password} 
-                  onChange={e => setForm(p => ({ ...p, password: e.target.value }))} 
+                  value={form.password}
+                  onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowPw(v => !v)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#00E5FF] transition-colors"
                 >
@@ -113,9 +113,9 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
-            <button 
-              type="submit" 
-              className="w-full bg-[#6366f1] text-white py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] hover:shadow-[0_10px_20px_rgba(99,102,241,0.3)] transition-all transform hover:-translate-y-0.5 mt-2 flex items-center justify-center" 
+            <button
+              type="submit"
+              className="w-full bg-[#6366f1] text-white py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] hover:shadow-[0_10px_20px_rgba(99,102,241,0.3)] transition-all transform hover:-translate-y-0.5 mt-2 flex items-center justify-center"
               disabled={loading}
             >
               {loading
@@ -133,16 +133,16 @@ export default function RegisterPage() {
       {/* Right Side: Image/Branding */}
       <div className="hidden lg:flex flex-1 bg-[#06061c] relative items-center justify-center overflow-hidden mesh-gradient-bg">
         <div className="absolute inset-0 bg-gradient-to-br from-[#06061c] via-transparent to-[#06061c] opacity-60 z-10" />
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, ease: 'easeOut' }}
           className="relative z-20 w-4/5 h-4/5 bg-white/5 border border-white/10 rounded-[3rem] backdrop-blur-xl p-8 flex flex-col items-center justify-center shadow-2xl"
         >
-          <img 
-            src="/auth_illustration.png" 
-            alt="AI Recruiting" 
+          <img
+            src="/auth_illustration.png"
+            alt="AI Recruiting"
             className="w-full h-full object-cover rounded-[2rem] shadow-2xl"
           />
           {/* Floating UI Card Overlay */}
