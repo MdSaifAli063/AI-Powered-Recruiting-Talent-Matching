@@ -87,18 +87,40 @@ exports.getCandidateAnalytics = async (req, res, next) => {
       ? Math.round(completedInterviews.reduce((s, i) => s + (i.report?.overallScore || 0), 0) / completedInterviews.length)
       : 0;
 
+    // Fetch top 4 active jobs as recommendations
+    const topJobs = await Job.find({ isActive: true })
+      .sort('-createdAt')
+      .limit(4)
+      .select('title company location type level createdAt');
+
+    // Calculate acceptance/rejection stats
+    const allJobsWithApplications = await Job.find({ 'applicants.candidate': candidateId });
+    let totalAccepted = 0;
+    let totalRejected = 0;
+
+    allJobsWithApplications.forEach(j => {
+      const app = j.applicants.find(a => a.candidate.toString() === candidateId);
+      if (app) {
+        if (['interview', 'offer', 'hired'].includes(app.status)) totalAccepted++;
+        if (app.status === 'rejected') totalRejected++;
+      }
+    });
+
     res.json({
       success: true,
       data: {
         profileScore: user.profileScore || 0,
         totalApplications: user.appliedJobs?.length || 0,
         totalInterviews: interviews.length,
+        totalAccepted,
+        totalRejected,
         completedInterviews: completedInterviews.length,
         avgInterviewScore,
         resumeAnalyzed: !!resume?.isAnalyzed,
         resumeScore: resume?.scores?.overall || 0,
         skills: user.skills || [],
         appliedJobs: user.appliedJobs || [],
+        topJobs,
         interviewHistory: completedInterviews.map(i => ({
           id: i._id,
           jobTitle: i.jobTitle,
