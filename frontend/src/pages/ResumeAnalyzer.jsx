@@ -79,6 +79,8 @@ export default function ResumeAnalyzer() {
   };
 
   const handleAnalyze = async () => {
+    if (!resume) return toast.error('Please upload a resume first');
+    
     setAnalyzing(true);
     try {
       const { data } = await api.post('/resume/analyze');
@@ -96,7 +98,11 @@ export default function ResumeAnalyzer() {
       
       await fetchMe();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Analysis failed');
+      const msg = err.response?.data?.message || 'Analysis failed';
+      toast.error(msg);
+      if (msg.includes('empty') || msg.includes('extract')) {
+        toast('Try pasting your resume text manually if the file upload is unreadable.', { icon: '💡', duration: 6000 });
+      }
     } finally {
       setAnalyzing(false);
     }
