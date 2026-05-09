@@ -8,32 +8,34 @@ const aiService = require('../services/aiService');
 // POST /api/resume/upload
 exports.uploadResume = async (req, res, next) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded.' });
-    }
-
-    const filePath = req.file.path;
-    const fileUrl = `/uploads/${req.file.filename}`;
     let rawText = '';
+    let fileName = 'Pasted Text';
+    let fileUrl = '';
 
-    // Extract text from file
-    try {
+    if (req.file) {
+      const filePath = req.file.path;
+      fileUrl = `/uploads/${req.file.filename}`;
+      fileName = req.file.originalname;
+
+      // Extract text from file
       if (req.file.mimetype === 'application/pdf') {
         const dataBuffer = fs.readFileSync(filePath);
         const pdfData = await pdfParse(dataBuffer);
         rawText = pdfData.text;
       } else if (req.file.mimetype === 'text/plain') {
         rawText = fs.readFileSync(filePath, 'utf8');
-      } else {
-        rawText = req.body.resumeText || 'Unable to extract text from this file format.';
       }
-    } catch (extractErr) {
-      console.warn('Text extraction error:', extractErr.message);
-      rawText = req.body.resumeText || '';
+    } else if (req.body.resumeText) {
+      rawText = req.body.resumeText;
+    } else {
+      return res.status(400).json({ success: false, message: 'No file or text provided.' });
     }
 
-    if (!rawText.trim()) {
-      return res.status(400).json({ success: false, message: 'Could not extract text from the uploaded file.' });
+    if (!rawText || !rawText.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        message: req.file ? 'Could not extract text from this file. Please try a different format or paste the text directly.' : 'Resume text is empty.' 
+      });
     }
 
     // Delete existing resume if any
@@ -42,18 +44,21 @@ exports.uploadResume = async (req, res, next) => {
     // Create resume record
     const resume = await Resume.create({
       candidate: req.user.id,
-      fileName: req.file.originalname,
+      fileName,
       fileUrl,
       rawText,
       isAnalyzed: false
     });
 
-    // Update user resumeUrl
-    await User.findByIdAndUpdate(req.user.id, { resumeUrl: fileUrl, resumeText: rawText.substring(0, 5000) });
+    // Update user resumeUrl and summary text
+    await User.findByIdAndUpdate(req.user.id, { 
+      resumeUrl: fileUrl, 
+      resumeText: rawText.substring(0, 5000) 
+    });
 
     res.status(201).json({
       success: true,
-      message: 'Resume uploaded successfully. Run analysis to get AI insights.',
+      message: req.file ? 'Resume uploaded successfully!' : 'Text saved successfully!',
       data: { id: resume._id, fileName: resume.fileName, fileUrl }
     });
   } catch (error) {
