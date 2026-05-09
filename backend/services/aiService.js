@@ -19,27 +19,44 @@ if (isDummyKey) {
 }
 
 function extractJSON(text) {
+  if (!text) throw new Error("AI returned an empty response.");
+  
   try {
-    // 1. Clean up potential markdown noise
+    // 1. Clean up potential markdown noise and whitespace
     let cleanText = text.trim();
     
-    // 2. Try to find JSON within code blocks
+    // 2. Try to find JSON within code blocks (handle both ```json and ```)
     const jsonMatch = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (jsonMatch && jsonMatch[1]) {
-      return JSON.parse(jsonMatch[1].trim());
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch (e) {
+        console.warn("Inner JSON block parse failed, trying full text.");
+      }
     }
 
     // 3. Find the first '{' and last '}' to extract a single JSON object
     const firstBrace = cleanText.indexOf('{');
     const lastBrace = cleanText.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      return JSON.parse(cleanText.substring(firstBrace, lastBrace + 1));
+      const jsonCandidate = cleanText.substring(firstBrace, lastBrace + 1);
+      try {
+        return JSON.parse(jsonCandidate);
+      } catch (e) {
+        // If it still fails, it might be due to trailing commas or unescaped characters
+        // Try a very basic cleanup for common AI mistakes
+        const superClean = jsonCandidate
+          .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
+          .replace(/\n/g, ' ') // Remove newlines
+          .replace(/\t/g, ' '); // Remove tabs
+        return JSON.parse(superClean);
+      }
     }
 
     return JSON.parse(cleanText);
   } catch (e) {
-    console.error("❌ JSON Extraction Failed. Raw text sample:", text.substring(0, 500));
-    throw new Error("AI returned an invalid response format. Please try again.");
+    console.error("❌ JSON Extraction Failed. Raw text sample:", text.substring(0, 1000));
+    throw new Error("The AI response was malformed. This usually happens with very long resumes. Please try again or use the 'Paste Text' option.");
   }
 }
 
