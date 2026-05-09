@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../lib/api';
 
 const PAGE_TITLES = {
   '/dashboard/recruiter': 'Recruiter Dashboard',
@@ -26,6 +27,30 @@ export default function TopBar({ onMenuClick }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await api.get('/notifications');
+      setNotifications(data.data.map(n => ({
+        id: n._id,
+        title: n.title,
+        desc: n.message,
+        time: new Date(n.createdAt).toLocaleDateString(),
+        read: n.isRead,
+        type: n.type
+      })));
+      setUnreadCount(data.data.filter(n => !n.isRead).length);
+    } catch (err) {
+      console.error('Failed to fetch notifications');
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleNewNotification = (e) => {
@@ -33,20 +58,34 @@ export default function TopBar({ onMenuClick }) {
         id: Date.now(),
         time: 'Just now',
         read: false,
-        ...e.detail
+        title: e.detail.title,
+        desc: e.detail.desc,
       }, ...prev]);
+      setUnreadCount(prev => prev + 1);
     };
 
     window.addEventListener('add-notification', handleNewNotification);
     return () => window.removeEventListener('add-notification', handleNewNotification);
   }, []);
 
-  const clearAllNotifications = () => {
-    setNotifications([]);
+  const clearAllNotifications = async () => {
+    try {
+      await api.patch('/notifications/read-all');
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Failed to clear notifications');
+    }
   };
 
-  const dismissNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+  const dismissNotification = async (id) => {
+    try {
+      await api.patch(`/notifications/${id}/read`);
+      setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Failed to mark as read');
+    }
   };
   
   const title = PAGE_TITLES[location.pathname] || 'HireMind';
@@ -90,56 +129,76 @@ export default function TopBar({ onMenuClick }) {
 
           {/* Notifications */}
           <div className="relative">
-            <button 
-              onClick={() => setShowNotifications(!showNotifications)}
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all relative
-              ${theme === 'dark' ? 'bg-white/5 text-white/40 hover:text-white' : 'bg-gray-50 text-gray-400 hover:text-[#05051a]'}`}
-            >
-              <Bell size={18} />
-              {notifications.length > 0 && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#00E5FF] rounded-full border-2 border-transparent shadow-[0_0_10px_#00E5FF]" />
-              )}
-            </button>
-            
-            <AnimatePresence>
-              {showNotifications && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className={`absolute right-0 mt-4 w-80 rounded-[2rem] border p-6 shadow-2xl z-50
-                    ${theme === 'dark' ? 'bg-[#0a0a25] border-white/10' : 'bg-white border-gray-100'}`}
-                >
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className={`text-sm font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>Notifications</h3>
-                    {notifications.length > 0 && (
-                      <button 
-                        onClick={clearAllNotifications}
-                        className="text-[10px] font-bold text-[#00E5FF] uppercase hover:underline"
-                      >
-                        Clear All
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
-                    {notifications.length > 0 ? (
-                      notifications.map((n) => (
-                        <div key={n.id} className={`p-4 rounded-2xl transition-colors group relative ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
-                          <div className="flex justify-between items-start mb-1">
-                            <p className={`text-xs font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{n.title}</p>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[9px] text-gray-400 font-bold">{n.time}</span>
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); dismissNotification(n.id); }}
-                                className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
-                              >
-                                <X size={10} />
-                              </button>
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all relative
+                ${theme === 'dark' ? 'bg-white/5 text-white/40 hover:text-white' : 'bg-gray-50 text-gray-400 hover:text-[#05051a]'}`}
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-2.5 right-2.5 w-4 h-4 bg-[#00E5FF] text-[#06061c] text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#06061c] shadow-[0_0_10px_#00E5FF]">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className={`absolute right-0 mt-4 w-80 rounded-[2rem] border p-6 shadow-2xl z-50
+                      ${theme === 'dark' ? 'bg-[#0a0a25] border-white/10' : 'bg-white border-gray-100'}`}
+                  >
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className={`text-sm font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>Notifications</h3>
+                      <div className="flex gap-4">
+                        {unreadCount > 0 && (
+                          <button 
+                            onClick={clearAllNotifications}
+                            className="text-[10px] font-bold text-[#00E5FF] uppercase hover:underline"
+                          >
+                            Mark Read
+                          </button>
+                        )}
+                        {notifications.length > 0 && (
+                          <button 
+                            onClick={async () => {
+                              try {
+                                await api.delete('/notifications');
+                                setNotifications([]);
+                                setUnreadCount(0);
+                              } catch (err) {
+                                console.error('Failed to clear notifications');
+                              }
+                            }}
+                            className="text-[10px] font-bold text-rose-500 uppercase hover:underline"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+                      {notifications.length > 0 ? (
+                        notifications.map((n) => (
+                          <div 
+                            key={n.id} 
+                            onClick={() => !n.read && dismissNotification(n.id)}
+                            className={`p-4 rounded-2xl transition-all group relative cursor-pointer
+                              ${n.read 
+                                ? theme === 'dark' ? 'bg-transparent text-white/30' : 'bg-transparent text-gray-400' 
+                                : theme === 'dark' ? 'bg-white/5 border border-white/5' : 'bg-indigo-50/50 border border-indigo-100/50'}`}
+                          >
+                            <div className="flex justify-between items-start mb-1">
+                              <p className={`text-[11px] font-black uppercase tracking-tight ${n.read ? 'opacity-50' : ''}`}>{n.title}</p>
+                              {!n.read && <div className="w-2 h-2 rounded-full bg-[#00E5FF]" />}
                             </div>
+                            <p className={`text-[10px] leading-relaxed ${n.read ? 'opacity-40' : 'text-gray-500 dark:text-white/60'}`}>{n.desc}</p>
+                            <p className="text-[8px] font-black uppercase tracking-widest mt-2 opacity-30">{n.time}</p>
                           </div>
-                          <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>{n.desc}</p>
-                        </div>
-                      ))
+                        ))
                     ) : (
                       <div className="py-10 text-center">
                         <p className={`text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-white/20' : 'text-gray-300'}`}>No new alerts</p>
