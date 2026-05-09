@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, MoreHorizontal, User, Star, MapPin, Zap, ChevronRight } from 'lucide-react';
+import { Briefcase, MoreHorizontal, User, Star, MapPin, Zap, ChevronRight, ArrowLeft, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -16,6 +17,7 @@ const STAGES = [
 ];
 
 export default function RecruiterPipeline() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { theme } = useTheme();
   const [jobs, setJobs] = useState([]);
@@ -80,7 +82,17 @@ export default function RecruiterPipeline() {
 
     try {
       await api.patch(`/jobs/${selectedJob}/applicants/${candidateId}/status`, { status: newStatus });
-      toast.success('Talent moved successfully');
+      
+      if (newStatus === 'interview') {
+        toast.success('Accepted! Message sent: "Get ready for the virtual interview"', { icon: '🤝', duration: 4000 });
+      } else if (newStatus === 'rejected') {
+        toast('Application rejected & candidate notified', { icon: '📁' });
+      } else {
+        toast.success('Talent moved successfully');
+      }
+
+      // Re-fetch to ensure we have the latest filtered view
+      fetchApplicants(selectedJob);
     } catch (err) {
       toast.error('Failed to update stage');
       fetchApplicants(selectedJob);
@@ -98,25 +110,35 @@ export default function RecruiterPipeline() {
   if (loading && !jobs.length) return <LoadingSpinner size={40} />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 flex flex-col h-[calc(100vh-140px)] px-4 sm:px-0">
-      <div className="flex flex-col md:flex-row gap-6 items-center justify-between shrink-0">
-        <div>
-          <h1 className={`text-4xl font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`} style={{ fontFamily: 'Outfit' }}>Talent Pipeline</h1>
-          <p className={`text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5 ${theme === 'dark' ? 'text-[#00E5FF]/60' : 'text-[#6366f1]'}`}>Visual hiring workflow optimization</p>
-        </div>
-        
-        <div className="w-full md:w-80">
-          <div className={`relative border transition-all rounded-2xl p-1
-            ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:border-white/10' : 'bg-white border-gray-200 shadow-xl shadow-gray-100/50'}`}>
-            <select 
-              className={`w-full bg-transparent border-none outline-none px-4 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer
-                ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`}
-              value={selectedJob || ''} 
-              onChange={handleJobChange}
-            >
-              {jobs.map(j => <option key={j._id} value={j._id} className={theme === 'dark' ? 'bg-[#0a0a25]' : 'bg-white'}>{j.title}</option>)}
-              {jobs.length === 0 && <option disabled>No active jobs</option>}
-            </select>
+    <div className="max-w-7xl mx-auto space-y-10 flex flex-col h-[calc(100vh-140px)] px-4 sm:px-0 pt-6">
+      <div className="flex flex-col gap-6 shrink-0">
+        <button 
+          onClick={() => navigate(-1)}
+          className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all w-fit px-4 py-2 rounded-xl
+            ${theme === 'dark' ? 'text-white/40 hover:text-white hover:bg-white/5' : 'text-gray-400 hover:text-[#05051a] hover:bg-gray-100'}`}
+        >
+          <ArrowLeft size={14} /> Back to Dashboard
+        </button>
+
+        <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+          <div>
+            <h1 className={`text-4xl font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`} style={{ fontFamily: 'Outfit' }}>Talent Pipeline</h1>
+            <p className={`text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5 ${theme === 'dark' ? 'text-[#00E5FF]/60' : 'text-[#6366f1]'}`}>Visual hiring workflow optimization</p>
+          </div>
+          
+          <div className="w-full md:w-80">
+            <div className={`relative border transition-all rounded-2xl p-1
+              ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:border-white/10' : 'bg-white border-gray-200 shadow-xl shadow-gray-200/50'}`}>
+              <select 
+                className={`w-full bg-transparent border-none outline-none px-4 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer
+                  ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`}
+                value={selectedJob || ''} 
+                onChange={handleJobChange}
+              >
+                {jobs.map(j => <option key={j._id} value={j._id} className={theme === 'dark' ? 'bg-[#0a0a25]' : 'bg-white'}>{j.title}</option>)}
+                {jobs.length === 0 && <option disabled>No active jobs</option>}
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -173,9 +195,25 @@ export default function RecruiterPipeline() {
                           app.candidate.name[0]
                         )}
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className={`text-sm font-black uppercase tracking-tight truncate mb-0.5 ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`}>{app.candidate.name}</p>
                         <p className={`text-[10px] font-bold uppercase tracking-widest truncate ${theme === 'dark' ? 'text-white/40' : 'text-[#6366f1]'}`}>{app.candidate.title || 'Strategist'}</p>
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <button 
+                          onClick={() => handleDrop({ preventDefault: () => {}, dataTransfer: { getData: () => app.candidate._id } }, 'interview')}
+                          className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                          title="Accept for Interview"
+                        >
+                          <Star size={12} fill="currentColor" />
+                        </button>
+                        <button 
+                          onClick={() => handleDrop({ preventDefault: () => {}, dataTransfer: { getData: () => app.candidate._id } }, 'rejected')}
+                          className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                          title="Reject Application"
+                        >
+                          <X size={12} />
+                        </button>
                       </div>
                     </div>
                     
