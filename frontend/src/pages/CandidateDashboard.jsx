@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, MessageSquare, TrendingUp, Briefcase, ChevronRight, Zap } from 'lucide-react';
+import { FileText, MessageSquare, TrendingUp, Briefcase, ChevronRight, Zap, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { StatCard, ScoreCircle, LoadingSpinner, ProgressBar, SectionHeader } from '../components/ui/Cards';
@@ -56,9 +56,9 @@ export default function CandidateDashboard() {
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard icon={Briefcase} label="Jobs Applied" value={data?.totalApplications || 0} color="#00E5FF" sub="Active Tracking" delay={0} />
-            <StatCard icon={MessageSquare} label="Interviews" value={data?.totalInterviews || 0} color="#6366f1" sub="AI Simulations" delay={0.05} />
-            <StatCard icon={FileText} label="Resume Rank" value={data?.resumeScore ? `${data.resumeScore}%` : '—'} color="#8b5cf6" sub="Market Ready" delay={0.1} />
-            <StatCard icon={TrendingUp} label="Skill Level" value={data?.avgInterviewScore ? `${data.avgInterviewScore}%` : '—'} color="#10b981" sub="Top 15%" delay={0.15} />
+            <StatCard icon={Zap} label="Accepted" value={data?.totalAccepted || 0} color="#10b981" sub="Interview Prep" delay={0.05} />
+            <StatCard icon={X} label="Rejected" value={data?.totalRejected || 0} color="#f87171" sub="Archived" delay={0.1} />
+            <StatCard icon={FileText} label="Resume Rank" value={data?.resumeScore ? `${data.resumeScore}%` : '—'} color="#8b5cf6" sub="Market Ready" delay={0.15} />
           </div>
 
           {/* Quick Actions Panel */}
@@ -138,12 +138,49 @@ export default function CandidateDashboard() {
             </div>
           </div>
 
+          {/* Top Jobs For You */}
+          <div className="glass rounded-[2.5rem] p-8 border-white/5">
+            <SectionHeader title="Top Opportunities for You"
+              subtitle="AI-matched roles based on your verified skills"
+              action={<Link to="/jobs" className="text-[10px] font-black uppercase tracking-widest text-[#00E5FF] hover:underline flex items-center gap-1">View All <ChevronRight size={10} /></Link>}
+            />
+            <div className="grid md:grid-cols-2 gap-6">
+              {(data?.topJobs || []).length > 0 ? (
+                data.topJobs.map(job => (
+                  <Link key={job._id} to={`/jobs/${job._id}`}>
+                    <div className="p-6 rounded-3xl bg-white/5 border border-white/5 hover:border-[#6366f1]/30 hover:bg-white/[0.08] transition-all group">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:rotate-6 transition-transform">
+                          <Briefcase size={18} className="text-[#00E5FF]" />
+                        </div>
+                        <div className="px-3 py-1 rounded-full bg-[#6366f1]/10 text-[#6366f1] text-[8px] font-black tracking-widest">
+                          {job.type.toUpperCase()}
+                        </div>
+                      </div>
+                      <h4 className="text-sm font-black uppercase tracking-tight text-white mb-1 group-hover:text-[#00E5FF] transition-colors">{job.title}</h4>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">{job.company} • {job.location}</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#00E5FF] to-[#6366f1]" style={{ width: '85%' }} />
+                        </div>
+                        <span className="text-[9px] font-black text-[#00E5FF]">85% MATCH</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-full py-10 text-center bg-white/5 rounded-[2rem] border border-dashed border-white/10">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Analyzing market for matches...</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Applied Jobs Section */}
           {data?.appliedJobs?.length > 0 && (
             <div className="glass rounded-[2.5rem] p-8 border-white/5">
               <SectionHeader title="Active Applications"
                 subtitle="Track your current hiring status"
-                action={<Link to="/jobs" className="text-[10px] font-black uppercase tracking-widest text-[#00E5FF] hover:underline flex items-center gap-1">Browse More <ChevronRight size={10} /></Link>}
               />
               <div className="grid md:grid-cols-2 gap-4">
                 {data.appliedJobs.slice(0, 4).map(job => (
