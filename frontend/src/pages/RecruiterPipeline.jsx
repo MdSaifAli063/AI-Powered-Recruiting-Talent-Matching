@@ -92,25 +92,25 @@ export default function RecruiterPipeline() {
   };
 
   const glassClass = theme === 'dark' 
-    ? 'bg-white/5 border-white/5 shadow-2xl' 
-    : 'bg-white border-gray-100 shadow-xl shadow-gray-200/40';
+    ? 'bg-[#0a0a25]/60 border-white/5 shadow-2xl backdrop-blur-xl' 
+    : 'bg-white border-gray-100 shadow-xl shadow-gray-200/50 backdrop-blur-xl';
 
   if (loading && !jobs.length) return <LoadingSpinner size={40} />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 flex flex-col h-[calc(100vh-140px)]">
+    <div className="max-w-7xl mx-auto space-y-10 flex flex-col h-[calc(100vh-140px)] px-4 sm:px-0">
       <div className="flex flex-col md:flex-row gap-6 items-center justify-between shrink-0">
         <div>
-          <h1 className={`text-3xl font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`} style={{ fontFamily: 'Outfit' }}>Talent Pipeline</h1>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.2em] mt-1 ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>Visual hiring workflow optimization</p>
+          <h1 className={`text-4xl font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`} style={{ fontFamily: 'Outfit' }}>Talent Pipeline</h1>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5 ${theme === 'dark' ? 'text-[#00E5FF]/60' : 'text-[#6366f1]'}`}>Visual hiring workflow optimization</p>
         </div>
         
         <div className="w-full md:w-80">
           <div className={`relative border transition-all rounded-2xl p-1
-            ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-white border-gray-100 shadow-lg shadow-gray-200/20'}`}>
+            ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:border-white/10' : 'bg-white border-gray-200 shadow-xl shadow-gray-100/50'}`}>
             <select 
-              className={`w-full bg-transparent border-none outline-none px-4 py-3 text-[10px] font-black uppercase tracking-widest cursor-pointer
-                ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}
+              className={`w-full bg-transparent border-none outline-none px-4 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer
+                ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`}
               value={selectedJob || ''} 
               onChange={handleJobChange}
             >
@@ -121,43 +121,51 @@ export default function RecruiterPipeline() {
         </div>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto pb-10 custom-scrollbar flex-1 items-stretch">
+      <div className="flex gap-8 overflow-x-auto pb-12 custom-scrollbar flex-1 items-stretch">
         {STAGES.map(stage => {
           const columnApplicants = applicants.filter(a => a.status === stage.id);
           return (
             <div 
               key={stage.id} 
-              className={`flex-1 min-w-[320px] flex flex-col rounded-[2.5rem] p-6 border transition-all duration-300 ${glassClass}`}
+              className={`flex-1 min-w-[340px] flex flex-col rounded-[3rem] p-7 border transition-all duration-300 ${glassClass}
+                ${theme === 'dark' ? 'hover:border-white/10' : 'hover:border-gray-200'}`}
               onDrop={(e) => handleDrop(e, stage.id)}
               onDragOver={allowDrop}
             >
-              <div className="flex items-center justify-between mb-8 shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full" style={{ background: stage.color, boxShadow: `0 0 12px ${stage.color}` }} />
-                  <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>
-                    {stage.label}
-                  </span>
-                  <span className={`text-[10px] font-black ${theme === 'dark' ? 'text-white/20' : 'text-gray-300'}`}>{columnApplicants.length}</span>
+              <div className="flex items-center justify-between mb-10 shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="w-3 h-3 rounded-full relative z-10" style={{ background: stage.color }} />
+                    <div className="absolute inset-0 w-3 h-3 rounded-full animate-ping opacity-40" style={{ background: stage.color }} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className={`text-[12px] font-black uppercase tracking-[0.25em] ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`}>
+                      {stage.label}
+                    </span>
+                    <span className={`text-[9px] font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>
+                      {columnApplicants.length} Candidates
+                    </span>
+                  </div>
                 </div>
-                <button className={`p-2 rounded-xl transition-all ${theme === 'dark' ? 'hover:bg-white/5 text-white/20' : 'hover:bg-gray-50 text-gray-300'}`}>
-                  <MoreHorizontal size={16} />
+                <button className={`p-2.5 rounded-2xl transition-all ${theme === 'dark' ? 'hover:bg-white/5 text-white/20' : 'hover:bg-gray-50 text-gray-400'}`}>
+                  <MoreHorizontal size={18} />
                 </button>
               </div>
 
-              <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2 min-h-[200px]">
+              <div className="flex-1 space-y-5 overflow-y-auto custom-scrollbar pr-3 min-h-[300px]">
                 {columnApplicants.map(app => (
                   <motion.div
                     key={app.candidate._id}
                     layoutId={app.candidate._id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, app.candidate._id)}
-                    className={`rounded-[2rem] p-5 cursor-grab active:cursor-grabbing border transition-all hover:scale-[1.02]
+                    className={`rounded-[2.5rem] p-6 cursor-grab active:cursor-grabbing border transition-all hover:scale-[1.02] active:scale-[0.98]
                       ${theme === 'dark' 
-                        ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-[#00E5FF]/20' 
-                        : 'bg-white border-gray-100 hover:shadow-xl hover:border-[#00E5FF]'}`}
+                        ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-[#00E5FF]/30 shadow-2xl' 
+                        : 'bg-white border-gray-100 hover:shadow-2xl shadow-gray-200/40 hover:border-[#6366f1]/30'}`}
                   >
-                    <div className="flex gap-4 items-center mb-4">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-sm font-black shadow-lg overflow-hidden flex-shrink-0"
+                    <div className="flex gap-5 items-center mb-5">
+                      <div className="w-14 h-14 rounded-[1.25rem] flex items-center justify-center text-white text-base font-black shadow-2xl overflow-hidden flex-shrink-0"
                         style={{ background: 'linear-gradient(135deg,#00E5FF,#6366f1)' }}>
                         {app.candidate.avatar ? (
                           <img src={app.candidate.avatar} className="w-full h-full object-cover" />
@@ -166,27 +174,30 @@ export default function RecruiterPipeline() {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className={`text-xs font-black uppercase tracking-tight truncate ${theme === 'dark' ? 'text-white' : 'text-[#05051a]'}`}>{app.candidate.name}</p>
-                        <p className={`text-[9px] font-bold uppercase tracking-widest truncate ${theme === 'dark' ? 'text-white/30' : 'text-gray-400'}`}>{app.candidate.title || 'Strategist'}</p>
+                        <p className={`text-sm font-black uppercase tracking-tight truncate mb-0.5 ${theme === 'dark' ? 'text-white' : 'text-[#1e1b4b]'}`}>{app.candidate.name}</p>
+                        <p className={`text-[10px] font-bold uppercase tracking-widest truncate ${theme === 'dark' ? 'text-white/40' : 'text-[#6366f1]'}`}>{app.candidate.title || 'Strategist'}</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between pt-4 border-t border-dashed border-white/10">
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 rounded-full">
-                        <Zap size={10} fill="#00E5FF" />
-                        <span className="text-[10px] font-black">{app.matchScore}%</span>
+                    <div className={`flex items-center justify-between pt-5 border-t border-dashed ${theme === 'dark' ? 'border-white/10' : 'border-gray-100'}`}>
+                      <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border ${theme === 'dark' ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20' : 'bg-[#6366f1]/5 text-[#6366f1] border-[#6366f1]/20'}`}>
+                        <Zap size={11} fill="currentColor" />
+                        <span className="text-[11px] font-black">{app.matchScore}% Match</span>
                       </div>
-                      <button className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-1
-                        ${theme === 'dark' ? 'text-white/20 hover:text-white' : 'text-gray-400 hover:text-[#05051a]'}`}>
-                        Full Profile <ChevronRight size={10} />
+                      <button className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors
+                        ${theme === 'dark' ? 'text-white/30 hover:text-[#00E5FF]' : 'text-gray-400 hover:text-[#6366f1]'}`}>
+                        Profile <ChevronRight size={12} />
                       </button>
                     </div>
                   </motion.div>
                 ))}
                 {columnApplicants.length === 0 && (
-                  <div className={`h-24 border-2 border-dashed rounded-[2rem] flex items-center justify-center
-                    ${theme === 'dark' ? 'border-white/5' : 'border-gray-50'}`}>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-300 opacity-20">Drop Talent Here</span>
+                  <div className={`h-40 border-2 border-dashed rounded-[3rem] flex flex-col items-center justify-center gap-3 transition-all
+                    ${theme === 'dark' ? 'border-white/5 bg-white/[0.02]' : 'border-gray-100 bg-gray-50/30'}`}>
+                    <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-white/5' : 'bg-white shadow-sm'}`}>
+                      <User size={16} className={theme === 'dark' ? 'text-white/20' : 'text-gray-300'} />
+                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white/20' : 'text-gray-400'}`}>Drop Talent Here</span>
                   </div>
                 )}
               </div>
