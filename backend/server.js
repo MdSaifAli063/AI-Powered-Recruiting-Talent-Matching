@@ -14,6 +14,7 @@ const interviewRoutes = require('./routes/interview');
 const aiRoutes = require('./routes/ai');
 const candidateRoutes = require('./routes/candidates');
 const analyticsRoutes = require('./routes/analytics');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use('/api/interview', interviewRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/candidates', candidateRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
