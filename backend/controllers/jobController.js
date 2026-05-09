@@ -169,7 +169,32 @@ exports.updateApplicantStatus = async (req, res, next) => {
     applicant.status = status;
     if (notes) applicant.notes = notes;
     await job.save({ validateBeforeSave: false });
-    res.json({ success: true, message: 'Status updated.', data: applicant });
+
+    // Create persistent notification for the candidate
+    try {
+      const Notification = require('../models/Notification');
+      let title = 'Application Update';
+      let message = `Your application status for "${job.title}" at ${job.company} has been updated to ${status}.`;
+
+      if (status === 'interview') {
+        title = 'Interview Invitation! 🤝';
+        message = `Congratulations! You have been invited for a virtual interview for the "${job.title}" role at ${job.company}. Please get ready!`;
+      } else if (status === 'rejected') {
+        title = 'Application Update';
+        message = `Thank you for your interest in the "${job.title}" role at ${job.company}. After careful review, we have decided to move forward with other candidates.`;
+      }
+
+      await Notification.create({
+        recipient: req.params.candidateId,
+        title,
+        message,
+        type: status === 'interview' ? 'interview_invite' : 'application_update'
+      });
+    } catch (notificationError) {
+      console.error('Failed to create notification:', notificationError.message);
+    }
+
+    res.json({ success: true, message: 'Status updated and candidate notified.', data: applicant });
   } catch (error) {
     next(error);
   }
