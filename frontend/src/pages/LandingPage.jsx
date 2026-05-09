@@ -521,27 +521,29 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white py-6 px-6 text-center relative z-20">
-        <div className="flex flex-col items-center gap-4">
+      <footer className="bg-white py-12 px-6 text-center relative z-20 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-8">
           <div className="flex items-center gap-3">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform -rotate-12">
               <path d="M4 20L12 4L20 20H12L4 20Z" fill="#00E5FF" />
               <path d="M12 4L20 20H12L12 4Z" fill="#06061c" />
             </svg>
-            <span className="text-2xl font-black text-[#06061c] tracking-tighter" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
+            <span className="text-xl font-black text-[#06061c] tracking-tighter" style={{ fontFamily: '"Outfit", system-ui, sans-serif' }}>HIREMIND</span>
           </div>
 
-          <div className="flex gap-10">
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 md:gap-x-12">
             {['Product', 'Company', 'Resources', 'Legal'].map(item => (
-              <a key={item} href="#" className="text-[11px] uppercase tracking-[0.2em] font-bold text-[#06061c]/50 hover:text-[#00E5FF] transition-colors">{item}</a>
+              <a key={item} href="#" className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-black text-[#06061c]/40 hover:text-[#6366f1] transition-all">
+                {item}
+              </a>
             ))}
           </div>
 
-          <div className="w-full max-w-lg h-px bg-[#06061c]/5" />
+          <div className="w-full max-w-sm h-px bg-gray-100" />
 
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] uppercase tracking-widest text-[#06061c]/30 font-medium">© 2026 HireMind. AI-Powered Recruiting OS.</p>
-            <p className="text-[10px] text-[#06061c]/20">Designed for the future of talent acquisition.</p>
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-[#06061c]/30 font-bold">© 2026 HireMind. AI-Powered Recruiting OS.</p>
+            <p className="text-[9px] sm:text-[10px] font-medium text-[#06061c]/20">Empowering human potential through ethical AI.</p>
           </div>
         </div>
       </footer>
