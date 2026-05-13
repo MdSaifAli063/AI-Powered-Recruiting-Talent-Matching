@@ -91,7 +91,7 @@ export default function TopBar({ onMenuClick }) {
   const title = PAGE_TITLES[location.pathname] || 'HireMind';
 
   return (
-    <header className={`h-[80px] lg:h-[90px] flex items-center justify-between px-4 lg:px-8 border-b transition-colors duration-300 flex-shrink-0 z-20 relative
+    <header className={`h-[80px] lg:h-[90px] flex items-center justify-between px-4 lg:px-8 border-b transition-colors duration-300 flex-shrink-0 z-[60] relative
       ${theme === 'dark' ? 'bg-[#06061c]/80 border-white/5 backdrop-blur-md' : 'bg-white/80 border-gray-100 backdrop-blur-md'}`}>
       
       <div className="flex items-center gap-4">
@@ -148,7 +148,7 @@ export default function TopBar({ onMenuClick }) {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className={`absolute right-0 mt-4 w-80 rounded-[2rem] border p-6 shadow-2xl z-50
+                    className={`absolute -right-20 sm:right-0 mt-4 w-[calc(100vw-40px)] sm:w-80 rounded-[2rem] border p-6 shadow-2xl z-[100]
                       ${theme === 'dark' ? 'bg-[#0a0a25] border-white/10' : 'bg-white border-gray-100'}`}
                   >
                     <div className="flex justify-between items-center mb-6">
