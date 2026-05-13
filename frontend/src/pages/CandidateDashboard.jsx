@@ -28,25 +28,31 @@ export default function CandidateDashboard() {
     <div className="space-y-8 max-w-[1600px] mx-auto pb-20">
       {/* Welcome Section */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="glass rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-between gap-8 border-white/5 relative overflow-hidden"
+        className="glass rounded-[2.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 border-white/5 relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, rgba(0,229,255,0.05), rgba(99,102,241,0.05))' }}>
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#00E5FF]/5 blur-[100px] rounded-full -mr-32 -mt-32" />
         
-        <div className="flex items-center gap-6 relative z-10">
-          <div className="w-20 h-20 rounded-[2rem] flex items-center justify-center text-3xl font-black text-[#06061c] shadow-2xl"
+        <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 text-center md:text-left">
+          <div className="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] flex items-center justify-center text-3xl font-black text-[#06061c] shadow-2xl overflow-hidden flex-shrink-0"
             style={{ background: 'linear-gradient(135deg,#00E5FF,#6366f1)' }}>
-            {user?.name?.[0]}
+            {user?.avatar ? (
+              <img src={user.avatar} className="w-full h-full object-cover" alt="" />
+            ) : (
+              user?.name?.[0]
+            )}
           </div>
           <div>
-            <h2 className="text-3xl font-black tracking-tight text-white uppercase italic" style={{ fontFamily: 'Outfit' }}>Welcome back, {user?.name?.split(' ')[0]}!</h2>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00E5FF] mt-1">Recruiting OS • AI Optimized Profile</p>
+            <h2 className="text-2xl md:text-4xl font-black tracking-tight text-white uppercase italic" style={{ fontFamily: 'Outfit' }}>
+              Welcome back, <span className="text-[#00E5FF]">{user?.name?.split(' ')[0]}!</span>
+            </h2>
+            <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.3em] text-[#00E5FF]/60 mt-2">Recruiting OS • AI Optimized Profile</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-8 px-8 py-4 bg-white/5 rounded-[2rem] border border-white/5 relative z-10 backdrop-blur-sm">
-          <ScoreCircle score={data?.profileScore || 0} size={80} label="PROFILE" />
+        <div className="flex items-center gap-4 md:gap-8 px-6 md:px-8 py-4 bg-white/5 rounded-[2rem] border border-white/5 relative z-10 backdrop-blur-sm w-full md:w-auto justify-center">
+          <ScoreCircle score={data?.profileScore || 0} size={70} label="PROFILE" />
           <div className="h-10 w-px bg-white/10" />
-          <ScoreCircle score={data?.resumeScore || 0} size={80} label="RESUME" />
+          <ScoreCircle score={data?.resumeScore || 0} size={70} label="RESUME" />
         </div>
       </motion.div>
 
