@@ -31,6 +31,7 @@ HireMind is a premium, full-stack AI talent matching platform designed to transf
 | **AI Engine** | OpenAI (GPT-4o-mini), Semantic Embeddings (text-embedding-3-small) |
 | **Architecture** | REST API, Concurrent Server Orchestration |
 
+
 ## 🚀 Getting Started
 
 ### 1️⃣ Prerequisites
