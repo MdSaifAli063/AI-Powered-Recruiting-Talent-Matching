@@ -21,6 +21,7 @@ HireMind is a premium, full-stack AI talent matching platform designed to transf
 - **🤖 AI Interviewer**: Adaptive, conversational interview sessions with real-time feedback and score reports.
 - **⚡ Profile Health Score**: Gamified profile building to help candidates stand out.
 
+
 ## 🛠️ Technology Stack
 
 | Layer | Technologies |
