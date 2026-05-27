@@ -63,7 +63,6 @@ Start both the frontend and backend with a single command from the root:
 npm run dev
 ```
 
-
 ## 🎨 Design System
 The platform features an ultra-premium **Glassmorphism** aesthetic with:
 - 🌌 Deep Navy & Cyan color palette.
