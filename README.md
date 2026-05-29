@@ -4,7 +4,6 @@ HireMind is a premium, full-stack AI talent matching platform designed to transf
 
 ![Hero Image Mockup](https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=1200)
 
-
 ## ✨ Features
 
 ### 🔍 Intelligence & Matching
